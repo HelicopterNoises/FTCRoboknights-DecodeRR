@@ -268,30 +268,21 @@ public class OmniOpMode extends LinearOpMode {
             if (gamepad2.back) {
                 outtake.setPower(-0.3);
             }
-            if (dpad_up_was_pressed()) {
+
+            if (gamepad2.right_trigger >= 0.5) {
                 PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-                if ((result.closestSwatch.toString() == ("ARTIFACT_PURPLE")) || (result.closestSwatch.toString() == ("ARTIFACT_GREEN"))){
+                if (!magazine.isBusy() && (((result.closestSwatch.toString().equals("ARTIFACT_PURPLE")) || (result.closestSwatch.toString().equals("ARTIFACT_GREEN"))))) {
                     fullRotation(1, 1, true, result.closestSwatch.toString());
-                    MagazinePositiveMotion = true;
                 }
-                //magazinePos = (int) (magazinePos + 96.245);
-                /*if (BottomAligned == false) {
-                    BottomAligned = false;
-                } else if (BottomAligned == true) {
-                    BottomAligned = true;
-                }*/
+            }
+
+            if (dpad_up_was_pressed()) {
+                fullRotation(1, 1, false, null);
+                MagazinePositiveMotion = true;
             } else {
                 if (dpad_down_was_pressed()) {
-                    PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-                    if ((result.closestSwatch.toString() == ("ARTIFACT_PURPLE")) || (result.closestSwatch.toString() == ("ARTIFACT_GREEN"))){
-                        fullRotation(-1, 1, true, result.closestSwatch.toString());
-                        MagazinePositiveMotion = false;
-                    }
-                    /*if (BottomAligned == true) {
-                        BottomAligned = true;
-                    } else if (BottomAligned == true) {
-                        BottomAligned = false;
-                    }*/
+                    fullRotation(-1, 1, false, null);
+                    MagazinePositiveMotion = false;
                 } else {
                     if (gamepad2.left_stick_button) {
                         MagazinePositiveMotion = true;
@@ -305,8 +296,8 @@ public class OmniOpMode extends LinearOpMode {
                             magazinePos = magazine.getCurrentPosition();
                         } else {
                             if (dpad_right_was_pressed()) {
-                                magazinePos = (int) (magazinePos + 48.1225);
                                 MagazinePositiveMotion = true;
+                                fullRotation(0.5f, 1, false,"null");
                                 /*if (BottomAligned == false) {
                                     BottomAligned = true;
                                 } else if (BottomAligned == true) {
@@ -314,8 +305,8 @@ public class OmniOpMode extends LinearOpMode {
                                 } */
                             } else {
                                 if (dpad_left_was_pressed()) {
-                                    magazinePos = (int) (magazinePos - 48.1225);
                                     MagazinePositiveMotion = false;
+                                    fullRotation(-0.5f, 1, false,"null");
                                     /*if (BottomAligned == false) {
                                         BottomAligned = true;
                                     } else if (BottomAligned == true) {
@@ -330,14 +321,16 @@ public class OmniOpMode extends LinearOpMode {
                 }
             }
             if (right_trigger_was_pressed()) {
-                if (counter == 0) {
+                if (counter == 0) { //On the first rotation, align
                     fullRotation(0.5f,1f,false,"null");
                 }
-                launchMotif(21, counter); ///NEED TO CALL LAUNCHMOTIF THREE TIMES BASED ON WHICH ONE WAS ACTUALLY LAUNCHED
-                counter += 1;
-                if (counter > 3) {
+                if (counter >= 3) { //On the 4th button press, DO NOT LAUNCH and realign
                     fullRotation(0.5f,1f,false,"null");
                     counter = 0;
+                }
+                else {
+                    launchMotif(21, counter); ///NEED TO CALL LAUNCHMOTIF THREE TIMES BASED ON WHICH ONE WAS ACTUALLY LAUNCHED
+                    counter += 1;
                 }
 
             }
@@ -396,9 +389,9 @@ public class OmniOpMode extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.addData("Status", "MagazinePos: " + magazinePos);
-            telemetry.addData("Status", "Bottom Aligned: " + BottomAligned);
-            telemetry.addData("Status", "Magazine Positive Motion" + MagazinePositiveMotion);
             telemetry.addData("Status", "CurrentPos: " + magazine.getCurrentPosition());
+            telemetry.addData("Status", "Bottom Aligned: " + BottomAligned);
+            //telemetry.addData("Status", "Magazine Positive Motion" + MagazinePositiveMotion);
             telemetry.addData("Front left/Right", JavaUtil.formatNumber(leftFrontPower, 4, 2) + ", " + JavaUtil.formatNumber(rightFrontPower, 4, 2));
             telemetry.addData("Back  left/Right", JavaUtil.formatNumber(leftBackPower, 4, 2) + ", " + JavaUtil.formatNumber(rightBackPower, 4, 2));
             telemetry.addData("colors 0", colors[0]);
@@ -469,8 +462,8 @@ public class OmniOpMode extends LinearOpMode {
 
 
     public void launchMotif ( int aprilTagID, int ballNumber){
-        float theoreticalSlot = topSlotNumber;
-        float numRotationsRequired = 0f;
+        float theoreticalSlot;
+        float numRotationsRequired;
         String[] motif = new String[3];
         switch (aprilTagID) {
             case 21:
@@ -499,10 +492,12 @@ public class OmniOpMode extends LinearOpMode {
         theoreticalSlot = topSlotNumber;
         numRotationsRequired = 0f;
         if (colors[(int) theoreticalSlot].equals(null)) {
-            telemetry.addData("value in array equals null", "skipped");
+            telemetry.addData("value in array equals null", "ball skipped and counter reset");
             telemetry.update();
+            fullRotation(0.5f, 1, false,null);
+            counter = 0;
             sleep(500);
-            //break;
+            return;
         }
         if ((colors[(int) theoreticalSlot]) != (null)) {
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[ballNumber]))) {
