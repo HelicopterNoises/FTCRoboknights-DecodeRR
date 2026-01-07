@@ -269,7 +269,7 @@ public class OmniOpMode extends LinearOpMode {
                 outtake.setPower(-0.3);
             }
 
-            if (gamepad2.right_trigger >= 0.5) {
+            if (gamepad2.left_trigger >= 0.5 && left_trigger_was_pressed()) {
                 PredominantColorProcessor.Result result = colorSensor.getAnalysis();
                 if (!magazine.isBusy() && (((result.closestSwatch.toString().equals("ARTIFACT_PURPLE")) || (result.closestSwatch.toString().equals("ARTIFACT_GREEN"))))) {
                     fullRotation(1, 1, true, result.closestSwatch.toString());
@@ -429,7 +429,7 @@ public class OmniOpMode extends LinearOpMode {
             if (slotNumber % 1.0 == 0) {
                 colors[(int) slotNumber] = colorResult;
                 if (!colors[(int) slotNumber].equals("ARTIFACT_PURPLE") && !colors[(int) slotNumber].equals("ARTIFACT_GREEN")) {
-                    //colors[(int) slotNumber] = "ARTIFACT_PURPLE";
+                    //colors[(int) slotNumber] = "ARTIFACT_PURPLE";///hold for error analysis
                 }
             }
         }
@@ -736,6 +736,9 @@ public class OmniOpMode extends LinearOpMode {
     }
     private boolean right_trigger_was_pressed() {
         return currentGamepad2.right_bumper && !previousGamepad2.right_bumper;
+    }
+    private boolean left_trigger_was_pressed() {
+        return currentGamepad2.left_bumper && !previousGamepad2.left_bumper;
     }
     private boolean dpad_down_was_pressed() {
         return currentGamepad2.dpad_down && !previousGamepad2.dpad_down;
