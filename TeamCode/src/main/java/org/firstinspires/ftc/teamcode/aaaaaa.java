@@ -1,33 +1,17 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.firstinspires.ftc.teamcode;
+
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -63,37 +47,10 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
 
 
-/*
- * This OpMode illustrates the concept of driving a path based on encoder counts.
- * The code is structured as a LinearOpMode
- *
- * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: RobotAutoDriveByTime;
- *
- *  This code ALSO requires that the drive Motors have been configured such that a positive
- *  power command moves them forward, and causes the encoders to count UP.
- *
- *   The desired path in this example is:
- *   - Drive forward for 48 inches
- *   - Spin right for 12 Inches
- *   - Drive Backward for 24 inches
- *   - Stop and close the claw.
- *
- *  The code is written using a method called: encoderDrive(speed, leftInches, rightInches, timeoutS)
- *  that performs the actual movement.
- *  This method assumes that each movement is relative to the last stopping place.
- *  There are other ways to perform encoder based moves, but this method is probably the simplest.
- *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
+@Config
+@Autonomous(name = "AAAAAAAAA", group = "Autonomous")
+public class aaaaaa extends LinearOpMode {
 
-@Autonomous(name="Magazine", group="Robot")
-//@Disabled
-public class Magazine extends LinearOpMode {
-
-    /* Declare OpMode members. */
     private DcMotorEx magazine = null;
     private DcMotor outtake = null;
 
@@ -160,9 +117,10 @@ public class Magazine extends LinearOpMode {
 
 
 
+
+
     @Override
     public void runOpMode() {
-        // Initialize the drive system variables.
         magazine = (DcMotorEx) hardwareMap.get(DcMotor.class, "magazine");
         outtake = hardwareMap.get(DcMotor.class, "outtake");
 
@@ -236,113 +194,114 @@ public class Magazine extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+        Pose2d beginPose = new Pose2d(48.17, 47.49, Math.toRadians(227.05));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+        //Claw claw = new Claw(hardwareMap);
+        //Lift lift = new Lift(hardwareMap);
 
+        // vision here that outputs position
+        int visionOutputPosition = 1;
+
+        /*TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
+                .lineToYSplineHeading(33, Math.toRadians(0))
+                .waitSeconds(2)
+                .setTangent(Math.toRadians(90))
+                .lineToY(48)
+                .setTangent(Math.toRadians(0))
+                .lineToX(32)
+                .strafeTo(new Vector2d(44.5, 30))
+                .turn(Math.toRadians(180))
+                .lineToX(47.5)
+                .waitSeconds(3);
+
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose)
+                .lineToY(37)
+                .setTangent(Math.toRadians(0))
+                .lineToX(18)
+                .waitSeconds(3)
+                .setTangent(Math.toRadians(0))
+                .lineToXSplineHeading(46, Math.toRadians(180))
+                .waitSeconds(3);
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose)
+                .lineToYSplineHeading(33, Math.toRadians(180))
+                .waitSeconds(2)
+                .strafeTo(new Vector2d(46, 30))
+                .waitSeconds(3);
+        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
+                .strafeTo(new Vector2d(48, 12))
+                .build();
+
+         */
+
+        /*Actions.runBlocking(
+                        drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(-57.78, 59.53), Math.toRadians(180.00))
+                .build()); */
+
+
+        //.splineTo(new Vector2d(-36, 0), Math.PI);
+
+
+        //.build();
+
+
+        // actions that need to happen on init; for instance, a claw tightening.
+        //Actions.runBlocking(claw.closeClaw());
+
+
+        while (!isStopRequested() && !opModeIsActive()) {
+            int position = visionOutputPosition;
+            telemetry.addData("Position during Init", position);
+            telemetry.update();
+        }
+
+        int startPosition = visionOutputPosition;
+        telemetry.addData("Starting Position", startPosition);
+        telemetry.update();
         waitForStart();
-        // Get the list of all detected fiducials (AprilTags)
-        //int attempts = 0;
-        while (opModeIsActive() && tagId == 0 && opModeIsActive()) { // Try for 5 seconds
-            LLResult tagResult = limelight.getLatestResult();
 
-            if (tagResult != null && tagResult.isValid()) {
-                List<LLResultTypes.FiducialResult> fiducials = tagResult.getFiducialResults();
+        if (isStopRequested()) return;
 
-                if (fiducials != null && !fiducials.isEmpty()) {
-                    // Use the first detected tag
-                    tagId = fiducials.get(0).getFiducialId();
+        Actions.runBlocking(
+                drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
+                        .build());
+        scanApriltag();
 
-                    telemetry.addData("✓ Detected Tag ID", tagId);
-                    telemetry.addData("Number of tags", fiducials.size());
-                    telemetry.update();
-                    break; // Found a tag, exit loop
-                }
-            }
-        }
-        sleep(1000);
-        /*aprilTagID = AprilTag_telemetry_for_Portal_1();
-        while (aprilTagID == null && opModeIsActive()) {
-            aprilTagID = AprilTag_telemetry_for_Portal_1();
-            telemetry.addData("DEBUG", "aprilTagID returned: " + aprilTagID);
-            telemetry.update();
-            sleep(50);
-        }*/
-        /// PRE LOAD SETTINGS
-        colors[0] = "ARTIFACT_PURPLE";
-        colors[1] = "ARTIFACT_GREEN";
-        colors[2] = "ARTIFACT_PURPLE";
-        /// THIS BLOCK IS THE OPERTATOR THAT INTAKES 3 BALLS AND CHECKS THE COLOR. NOT NECESSARY FOR FIRST PASS
-        PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-        /*for (int i = 0; i < 3; i++) {
-            sleep(1000);
-            fullRotation(1, 0.3f, true);
-            while (magazine.isBusy() && opModeIsActive()) {
-                //hold loop while function moving
-            }
-            telemetry.addData("Best Match", result.closestSwatch.toString());
-            telemetry.addData("Color Array", colors[0] + ", " + colors[1] + ", " + colors[2]);
-            telemetry.update();
-        }
-        */
-        /// END OF BLOCK THAT IS THE OPERTATOR THAT INTAKES BALLS AND CHECKS THE COLOR.
+        Actions.runBlocking(
+                drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(23.83, 18.08), Math.toRadians(43.43))
+                        .build());
+
         outtake.setPower(0.6);
         sleep(2000);
 
         fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
-        //launches based on scanned apriltag
-        /*if (aprilTagID.equals("21")) {
-            launchMotif(21);
-        }
-        if (aprilTagID.equals("22")) {
-            launchMotif(22);
-        }
-        if (aprilTagID.equals("23")) {
-            launchMotif(23);
-        }*/
 
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
 
-        //telemetry.addData("Path", "Complete");
-        telemetry.update();
-        //sleep(3000);  // pause to display final telemetry message.
-
-
-        //Closes visionportals to fix problems related to cameras being "already attached"
-        if (myVisionPortal_1 != null) {
-            myVisionPortal_1.close();
-        }
-        if (myVisionPortal_2 != null) {
-            myVisionPortal_2.close();
+        /*
+        Action trajectoryActionChosen;
+        if (startPosition == 1) {
+            trajectoryActionChosen = tab1.build();
+        } else if (startPosition == 2) {
+            trajectoryActionChosen = tab2.build();
+        } else {
+            trajectoryActionChosen = tab3.build();
         }
 
+        Actions.runBlocking(
+                new SequentialAction(
+                        trajectoryActionChosen,
+                        lift.liftUp(),
+                        claw.openClaw(),
+                        lift.liftDown(),
+                        trajectoryActionCloseOut
+                )
+        ); */
     }
 
-
-    /*
-     *  Method to perform a relative move, based on encoder counts.
-     *  Encoders are not reset as the move is based on the current position.
-     *  Move will stop if any of three conditions occur:
-     *  1) Move gets to the desired position
-     *  2) Move runs out of time
-     *  3) Driver stops the OpMode running.
-     */
-    /*public void halfRotation() {
-        PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-        sleep(1500);
-        if (slotNumber % 1.0 == 0) {
-            colors[(int) slotNumber] = result.closestSwatch.toString();
-        }
-        if (slotNumber < 2.5) {
-            slotNumber += 0.5;
-        } else {
-            slotNumber = 0;
-        }
-        magazine.setTargetPosition(magazine.getCurrentPosition() + COUNTS_PER_FULL_REV*0.5);
-        magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        magazine.setPower(DRIVE_SPEED);
-    } */
     public void fullRotation(float numOfRotations, float magazinePower, boolean assignNewColor) {
         if (assignNewColor) {
             sleep(1000);
@@ -485,7 +444,7 @@ public class Magazine extends LinearOpMode {
                 telemetry.addData("value in array equals null", "skipped");
                 telemetry.update();
                 sleep(500);
-                break;
+                continue;
             }
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[i]))) {
                 numRotationsRequired += 1f;
@@ -710,7 +669,31 @@ public class Magazine extends LinearOpMode {
         telemetry.addLine("RBE = Range, Bearing & Elevation");
     }
 
+
+    private void scanApriltag() {
+        colors[0] = "ARTIFACT_PURPLE";
+        colors[1] = "ARTIFACT_GREEN";
+        colors[2] = "ARTIFACT_PURPLE";
+        while (opModeIsActive() && tagId == 0 && opModeIsActive()) { // Try for 5 seconds
+            LLResult tagResult = limelight.getLatestResult();
+
+            if (tagResult != null && tagResult.isValid()) {
+                List<LLResultTypes.FiducialResult> fiducials = tagResult.getFiducialResults();
+
+                if (fiducials != null && !fiducials.isEmpty()) {
+                    // Use the first detected tag
+                    tagId = fiducials.get(0).getFiducialId();
+
+                    telemetry.addData("✓ Detected Tag ID", tagId);
+                    telemetry.addData("Number of tags", fiducials.size());
+                    telemetry.update();
+                    break; // Found a tag, exit loop
+                }
+            }
+        }
+    }
+
 }
 
 
-
+//}
