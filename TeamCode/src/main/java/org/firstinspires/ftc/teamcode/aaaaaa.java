@@ -467,9 +467,10 @@ public class aaaaaa extends LinearOpMode {
             telemetry.addData("numRotationsRequired", numRotationsRequired);
             telemetry.update();
             fullRotation(numRotationsRequired, 0.4F, false);
-            while (magazine.isBusy() && opModeIsActive()) {
+            sleep(2000);
+            //while (magazine.isBusy() && opModeIsActive()) {
                 //hold loop while function moving
-            }
+            //}
             colors[(int)theoreticalSlot] = "";
             telemetry.addData("launching", i);
             telemetry.addData("Bottom Slot", slotNumber);
