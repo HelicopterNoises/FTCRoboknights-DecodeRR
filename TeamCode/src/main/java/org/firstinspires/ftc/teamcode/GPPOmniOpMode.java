@@ -1,16 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.configuration.EthernetOverUsbConfiguration;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import org.firstinspires.ftc.teamcode.OmniOpMode;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+//import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import android.util.Size;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -22,12 +21,11 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
-
 import java.util.List;
 
 
-@TeleOp(name = "21 GPP - 2026 Omni Op Mode")
-public class OmniOpMode extends LinearOpMode {
+@TeleOp(name = "21 GPP - 2026 Omni Op Mode OBJ")
+public class GPPOmniOpMode extends LinearOpMode {
 
     private DcMotor frontLeft;
     private DcMotor backLeft;
@@ -162,6 +160,11 @@ public class OmniOpMode extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        USE_WEBCAM_1 = true;
+        USE_WEBCAM_2 = true;
+        initMultiPortals();
+
         waitForStart();
         runtime.reset();
 
@@ -185,9 +188,7 @@ public class OmniOpMode extends LinearOpMode {
         // Wait for the game to start (driver presses START)
 
         // This OpMode shows AprilTag recognition and pose estimation.
-        USE_WEBCAM_1 = true;
-        USE_WEBCAM_2 = true;
-        initMultiPortals();
+
         // Initialize AprilTag before waitForStart.
 
         colorSensor = new PredominantColorProcessor.Builder()
@@ -234,175 +235,212 @@ public class OmniOpMode extends LinearOpMode {
         //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
         // Run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            previousGamepad2.copy(currentGamepad2);
-            currentGamepad2.copy(gamepad2);
-            // Start Section: Drive
-            // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            // Note: pushing stick forward gives negative value
-            axial = -gamepad1.left_stick_y;
-            lateral = gamepad1.left_stick_x;
-            yaw = gamepad1.right_stick_x;
-            // Combine the joystick requests for each axis-motion to determine each wheel's power.
-            // Set up a variable for each drive wheel to save the power level for telemetry.
-            if (gamepad1.left_bumper) {
-                driveSpeed = 0.5;
-            } else {
-                driveSpeed = 1;
-            }
-            if (gamepad2.y) {
-                intake.setPower(1);
-            } else {
-                if (gamepad2.x) {
-                    intake.setPower(-0.4);
+        try {
+            while (opModeIsActive()) {
+                previousGamepad2.copy(currentGamepad2);
+                currentGamepad2.copy(gamepad2);
+                // Start Section: Drive
+                // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+                // Note: pushing stick forward gives negative value
+                axial = -gamepad1.left_stick_y;
+                lateral = gamepad1.left_stick_x;
+                yaw = gamepad1.right_stick_x;
+                // Combine the joystick requests for each axis-motion to determine each wheel's power.
+                // Set up a variable for each drive wheel to save the power level for telemetry.
+                if (gamepad1.left_bumper) {
+                    driveSpeed = 0.5;
                 } else {
-                    intake.setPower(0);
+                    driveSpeed = 1;
                 }
-            }
-            if (gamepad2.a) {
-                outtake.setPower(0.6);
-            }
-            if (gamepad2.b) {
-                outtake.setPower(0);
-            }
-            if (gamepad2.back) {
-                outtake.setPower(-0.3);
-            }
-
-            if (gamepad2.left_trigger >= 0.5 && left_trigger_was_pressed()) {
-                PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-                if (!magazine.isBusy() && (((result.closestSwatch.toString().equals("ARTIFACT_PURPLE")) || (result.closestSwatch.toString().equals("ARTIFACT_GREEN"))))) {
-                    fullRotation(1, 1, true, result.closestSwatch.toString());
-                }
-            }
-
-            if (dpad_up_was_pressed()) {
-                fullRotation(1, 1, false, null);
-                MagazinePositiveMotion = true;
-            } else {
-                if (dpad_down_was_pressed()) {
-                    fullRotation(-1, 1, false, null);
-                    MagazinePositiveMotion = false;
+                if (gamepad2.y) {
+                    intake.setPower(1);
                 } else {
-                    if (gamepad2.left_stick_button) {
-                        MagazinePositiveMotion = true;
-                        magazine.setPower(0.7);
-                        magazinePos = magazine.getCurrentPosition();
-                        //BottomAligned = null;
+                    if (gamepad2.x) {
+                        intake.setPower(-0.4);
                     } else {
-                        if (gamepad2.right_stick_button) {
-                            MagazinePositiveMotion = false;
-                            magazine.setPower(-0.7);
+                        intake.setPower(0);
+                    }
+                }
+                if (gamepad2.a) {
+                    outtake.setPower(0.67);
+                }
+                if (gamepad2.b) {
+                    outtake.setPower(0);
+                }
+                if (gamepad2.back) {
+                    outtake.setPower(-0.3);
+                }
+
+                if (left_bumper_was_pressed()) { //control for autosort
+                    PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+                    if ((((result.closestSwatch.toString().equals("ARTIFACT_PURPLE")) || (result.closestSwatch.toString().equals("ARTIFACT_GREEN"))))) {
+                        fullRotation(1, 1, true, result.closestSwatch.toString());
+                    } else {
+                        telemetry.addData("Did not rotate", "No color detected");
+                        telemetry.update();
+                    }
+                }
+
+                if (dpad_up_was_pressed()) {
+                    fullRotation(1, 1, false, null);
+                    MagazinePositiveMotion = true;
+                } else {
+                    if (dpad_down_was_pressed()) {
+                        fullRotation(-1, 1, false, null);
+                        MagazinePositiveMotion = false;
+                    } else {
+                        if (gamepad2.left_stick_button) {
+                            MagazinePositiveMotion = true;
+                            magazine.setPower(0.7);
                             magazinePos = magazine.getCurrentPosition();
+                            //BottomAligned = null;
                         } else {
-                            if (dpad_right_was_pressed()) {
-                                MagazinePositiveMotion = true;
-                                fullRotation(0.5f, 1, false,"null");
+                            if (gamepad2.right_stick_button) {
+                                MagazinePositiveMotion = false;
+                                magazine.setPower(-0.7);
+                                magazinePos = magazine.getCurrentPosition();
+                            } else {
+                                if (dpad_right_was_pressed()) {
+                                    MagazinePositiveMotion = true;
+                                    fullRotation(0.5f, 1, false, "null");
                                 /*if (BottomAligned == false) {
                                     BottomAligned = true;
                                 } else if (BottomAligned == true) {
                                     BottomAligned = false;
                                 } */
-                            } else {
-                                if (dpad_left_was_pressed()) {
-                                    MagazinePositiveMotion = false;
-                                    fullRotation(-0.5f, 1, false,"null");
+                                } else {
+                                    if (dpad_left_was_pressed()) {
+                                        MagazinePositiveMotion = false;
+                                        fullRotation(-0.5f, 1, false, "null");
                                     /*if (BottomAligned == false) {
                                         BottomAligned = true;
                                     } else if (BottomAligned == true) {
                                         BottomAligned = false;
                                     }*/
-                                } else {
-                                    //PDIcontroller = false;
+                                    } else {
+                                        //PDIcontroller = false;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            if (right_trigger_was_pressed()) {
-                if (counter == 0) { //On the first rotation, align
-                    fullRotation(0.5f,1f,false,"null");
-                }
-                if (counter >= 3) { //On the 4th button press, DO NOT LAUNCH and realign
-                    fullRotation(0.5f,1f,false,"null");
-                    counter = 0;
-                }
-                else {
-                    launchMotif(21, counter); ///NEED TO CALL LAUNCHMOTIF THREE TIMES BASED ON WHICH ONE WAS ACTUALLY LAUNCHED
-                    counter += 1;
-                }
+                if (right_trigger_was_pressed()) {
+                    if (counter == 0) { //On the first rotation, align
+                        if (colors[0] != null && colors[1] != null && colors[2] != null) {
+                            fullRotation(0.5f, 1f, false, "null");
+                        }
+                    } else {
+                        telemetry.addData("magazine slot", "empty");
+                        telemetry.update();
+                    }
 
-            }
+                    if (counter >= 3) { //On the 4th button press, DO NOT LAUNCH and realign
+                        fullRotation(0.5f, 1f, false, "null");
+                        counter = 0;
+                    } else {
+                        launchMotif(21, counter); ///NEED TO CALL LAUNCHMOTIF THREE TIMES BASED ON WHICH ONE WAS ACTUALLY LAUNCHED
+                        counter += 1;
+                    }
 
-            /// move the magazine with custom "PID"
-            if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
-                magazine.setPower(1);
-                PDIcontroller = false;
-            } else {
-                if (magazinePos - magazine.getCurrentPosition() <= -11 && MagazinePositiveMotion == false) {
-                    magazine.setPower(-1);
+                }
+                //}
+
+                /// move the magazine with custom "PID"
+                if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
+                    magazine.setPower(1);
                     PDIcontroller = false;
                 } else {
-                    magazine.setPower(0);
-                    PDIcontroller = true;
-                }
-            }
-            if (PDIcontroller == true) {
-                if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == false) {
-                    magazine.setPower(0.5);
-                } else {
-                    if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == true) {
-                        magazine.setPower(-0.5);
+                    if (magazinePos - magazine.getCurrentPosition() <= -11 && MagazinePositiveMotion == false) {
+                        magazine.setPower(-1);
+                        PDIcontroller = false;
                     } else {
-                        if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == true) {
-                            magazine.setPower(0.2);
+                        magazine.setPower(0);
+                        PDIcontroller = true;
+                    }
+                }
+                if (PDIcontroller == true) {
+                    if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == false) {
+                        magazine.setPower(0.5);
+                    } else {
+                        if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == true) {
+                            magazine.setPower(-0.5);
                         } else {
-                            if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == false) {
-                                magazine.setPower(-0.2);
+                            if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == true) {
+                                magazine.setPower(0.2);
                             } else {
-                                magazine.setPower(0);
-                                PDIcontroller = false;
+                                if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == false) {
+                                    magazine.setPower(-0.2);
+                                } else {
+                                    magazine.setPower(0);
+                                    PDIcontroller = false;
+                                }
                             }
                         }
                     }
                 }
-            }
-            leftFrontPower = (axial + lateral + yaw) * driveSpeed;
-            rightFrontPower = ((axial - lateral) - yaw) * driveSpeed;
-            leftBackPower = ((axial - lateral) + yaw) * driveSpeed;
-            rightBackPower = ((axial + lateral) - yaw) * driveSpeed;
-            // Normalize the values so no wheel power exceeds 100%
-            // This ensures that the robot maintains the desired motion.
-            max = JavaUtil.maxOfList(JavaUtil.createListWith(Math.abs(leftFrontPower), Math.abs(rightFrontPower), Math.abs(leftBackPower), Math.abs(rightBackPower)));
-            if (max > 1) {
-                leftFrontPower = leftFrontPower / max;
-                rightFrontPower = rightFrontPower / max;
-                leftBackPower = leftBackPower / max;
-                rightBackPower = rightBackPower / max;
-            }
-            // Send calculated power to wheels.
-            frontLeft.setPower(leftFrontPower);
-            frontRight.setPower(rightFrontPower);
-            backLeft.setPower(leftBackPower);
-            backRight.setPower(rightBackPower);
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime);
-            telemetry.addData("Status", "MagazinePos: " + magazinePos);
-            telemetry.addData("Status", "CurrentPos: " + magazine.getCurrentPosition());
-            telemetry.addData("Status", "Bottom Aligned: " + BottomAligned);
-            //telemetry.addData("Status", "Magazine Positive Motion" + MagazinePositiveMotion);
-            telemetry.addData("Front left/Right", JavaUtil.formatNumber(leftFrontPower, 4, 2) + ", " + JavaUtil.formatNumber(rightFrontPower, 4, 2));
-            telemetry.addData("Back  left/Right", JavaUtil.formatNumber(leftBackPower, 4, 2) + ", " + JavaUtil.formatNumber(rightBackPower, 4, 2));
-            telemetry.addData("colors 0", colors[0]);
-            telemetry.addData("colors 1", colors[1]);
-            telemetry.addData("colors 2", colors[2]);
-            telemetry.addData("Counter", counter);
+                leftFrontPower = (axial + lateral + yaw) * driveSpeed;
+                rightFrontPower = ((axial - lateral) - yaw) * driveSpeed;
+                leftBackPower = ((axial - lateral) + yaw) * driveSpeed;
+                rightBackPower = ((axial + lateral) - yaw) * driveSpeed;
+                // Normalize the values so no wheel power exceeds 100%
+                // This ensures that the robot maintains the desired motion.
+                max = JavaUtil.maxOfList(JavaUtil.createListWith(Math.abs(leftFrontPower), Math.abs(rightFrontPower), Math.abs(leftBackPower), Math.abs(rightBackPower)));
+                if (max > 1) {
+                    leftFrontPower = leftFrontPower / max;
+                    rightFrontPower = rightFrontPower / max;
+                    leftBackPower = leftBackPower / max;
+                    rightBackPower = rightBackPower / max;
+                }
+                // Send calculated power to wheels.
+                frontLeft.setPower(leftFrontPower);
+                frontRight.setPower(rightFrontPower);
+                backLeft.setPower(leftBackPower);
+                backRight.setPower(rightBackPower);
+                // Show the elapsed game time and wheel power.
+                telemetry.addData("Status", "Run Time: " + runtime);
+                telemetry.addData("Status", "MagazinePos: " + magazinePos);
+                telemetry.addData("Status", "CurrentPos: " + magazine.getCurrentPosition());
+                telemetry.addData("Status", "Bottom Aligned: " + BottomAligned);
+                //telemetry.addData("Status", "Magazine Positive Motion" + MagazinePositiveMotion);
+                telemetry.addData("Front left/Right", JavaUtil.formatNumber(leftFrontPower, 4, 2) + ", " + JavaUtil.formatNumber(rightFrontPower, 4, 2));
+                telemetry.addData("Back  left/Right", JavaUtil.formatNumber(leftBackPower, 4, 2) + ", " + JavaUtil.formatNumber(rightBackPower, 4, 2));
+                telemetry.addData("colors 0", colors[0]);
+                telemetry.addData("colors 1", colors[1]);
+                telemetry.addData("colors 2", colors[2]);
+                telemetry.addData("Counter", counter);
 
-            telemetry.update();
-            magazine.setTargetPosition(magazinePos);
+                PredominantColorProcessor.Result telResult = colorSensor.getAnalysis();
+                telemetry.addData("Current color detected", telResult);
+
+
+
+                telemetry.update();
+                magazine.setTargetPosition(magazinePos);
+
+            }
         }
-    }
+        finally {
+            // This ALWAYS runs, even if STOP is pressed
+            if (myVisionPortal_1 != null) {
+                myVisionPortal_1.close();
+            }
+            if (myVisionPortal_2 != null) {
+                myVisionPortal_2.close();
+            }
+
+            // Stop all motors
+            frontLeft.setPower(0);
+            frontRight.setPower(0);
+            backLeft.setPower(0);
+            backRight.setPower(0);
+            intake.setPower(0);
+            magazine.setPower(0);
+            outtake.setPower(0);
+        }
+
+        }
+
 
     /**
      * This function is used to test your motor directions.
@@ -491,15 +529,15 @@ public class OmniOpMode extends LinearOpMode {
         //for (int i = 0; i < 3; i++) {
         theoreticalSlot = topSlotNumber;
         numRotationsRequired = 0f;
-        if (colors[(int) theoreticalSlot].equals(null)) {
-            telemetry.addData("value in array equals null", "ball skipped and counter reset");
+        if (colors[(int) theoreticalSlot].isEmpty()) {
+            telemetry.addData("value in array is empty", "ball skipped and counter reset");
             telemetry.update();
             fullRotation(0.5f, 1, false,null);
             counter = 0;
             sleep(500);
             return;
         }
-        if ((colors[(int) theoreticalSlot]) != (null)) {
+        //if ((colors[(int) theoreticalSlot]) != (null)) {
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[ballNumber]))) {
                 numRotationsRequired += 1f;
                 theoreticalSlot += 1f;
@@ -515,7 +553,7 @@ public class OmniOpMode extends LinearOpMode {
                 telemetry.addData(colors[(int) theoreticalSlot], motif[ballNumber]);
                 telemetry.update();
             }
-        }
+        //}
             /*if (numRotationsRequired == 2f) { //this makes it rotate in the other direction instead of rotating twice
                 numRotationsRequired = -1f;
             }*/
@@ -737,7 +775,7 @@ public class OmniOpMode extends LinearOpMode {
     private boolean right_trigger_was_pressed() {
         return currentGamepad2.right_bumper && !previousGamepad2.right_bumper;
     }
-    private boolean left_trigger_was_pressed() {
+    private boolean left_bumper_was_pressed() {
         return currentGamepad2.left_bumper && !previousGamepad2.left_bumper;
     }
     private boolean dpad_down_was_pressed() {
