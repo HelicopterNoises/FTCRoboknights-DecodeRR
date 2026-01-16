@@ -1,39 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 
-import androidx.annotation.NonNull;
+import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.configuration.EthernetOverUsbConfiguration;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import android.util.Size;
-
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-
-import java.util.List;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -45,11 +25,12 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
+import java.util.List;
 
 
 @Config
-@Autonomous(name = "Red Score Side", group = "Autonomous")
-public class aaaaaa extends LinearOpMode {
+@Autonomous(name = "Red Back Side", group = "Autonomous")
+public class RedBackSide extends LinearOpMode {
 
     private DcMotorEx magazine = null;
     private DcMotor outtake = null;
@@ -194,7 +175,7 @@ public class aaaaaa extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        Pose2d beginPose = new Pose2d(48.17, 47.49, Math.toRadians(227.05));
+        Pose2d beginPose = new Pose2d(59.49, 12.51, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -262,18 +243,18 @@ public class aaaaaa extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        Actions.runBlocking(
+        /*Actions.runBlocking(
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
-                        .build());
+                        .build());*/
         scanApriltag();
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(23.83, 18.08), Math.toRadians(43.43))
+                        .splineTo(new Vector2d(56.45, 12.68), Math.toRadians(165))
                         .build());
 
-        outtake.setPower(0.6);
+        outtake.setPower(1);
         sleep(2000);
 
         fullRotation(0.5f, 0.3f, false);
@@ -469,7 +450,7 @@ public class aaaaaa extends LinearOpMode {
             fullRotation(numRotationsRequired, 0.4F, false);
             sleep(2000);
             //while (magazine.isBusy() && opModeIsActive()) {
-                //hold loop while function moving
+            //hold loop while function moving
             //}
             colors[(int)theoreticalSlot] = "";
             telemetry.addData("launching", i);

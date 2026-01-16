@@ -42,35 +42,14 @@ public class GPPOmniOpMode extends LinearOpMode {
 
     private PredominantColorProcessor colorSensor;
 
-    VisionPortal.Builder myVisionPortalBuilder;
-    VisionPortal.Builder secondPortalBuilder;
+    //VisionPortal.Builder myVisionPortalBuilder;
+    //VisionPortal.Builder secondPortalBuilder;
     boolean USE_WEBCAM_1;
     //boolean MagazinePositiveMotion;
     int Portal_1_View_ID;
     int counter = 0;
     boolean USE_WEBCAM_2;
     int Portal_2_View_ID;
-    AprilTagProcessor myAprilTagProcessor_1;
-    //AprilTagProcessor myAprilTagProcessor_2;
-    VisionPortal myVisionPortal_1;
-    VisionPortal myVisionPortal_2;
-
-
-    private void initMultiPortals() {
-        List myPortalsList;
-
-        myPortalsList = JavaUtil.makeIntegerList(VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL));
-        Portal_1_View_ID = ((Integer) JavaUtil.inListGet(myPortalsList, JavaUtil.AtMode.FROM_START, (int) 0, false)).intValue();
-        Portal_2_View_ID = ((Integer) JavaUtil.inListGet(myPortalsList, JavaUtil.AtMode.FROM_START, (int) 1, false)).intValue();
-        telemetry.addData("Portal 1 View ID (index 0 of myPortalsList)", Portal_1_View_ID);
-        telemetry.addData("Portal 2 View ID (index 1 of myPortalsList)", Portal_2_View_ID);
-        telemetry.addLine("");
-        //telemetry.addLine("Press Y to continue");
-        telemetry.update();
-        //while (!gamepad1.y && opModeInInit()) {
-        // Loop until gamepad Y button is pressed.
-        //}
-    }
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
@@ -91,6 +70,8 @@ public class GPPOmniOpMode extends LinearOpMode {
     float slotNumber = 0f;
     float topSlotNumber = 1.5f;
     int magazinePos;
+    String swatchResult;
+    float outtakePower = 0f;
 
     String aprilTagID = String.valueOf("21");
     int currentMagazinePosition = 0;
@@ -161,9 +142,42 @@ public class GPPOmniOpMode extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        USE_WEBCAM_1 = true;
-        USE_WEBCAM_2 = true;
-        initMultiPortals();
+        //USE_WEBCAM_1 = false;
+        //USE_WEBCAM_2 = true;
+        //initMultiPortals();///INIT YOUR ONE PORTAL
+
+        PredominantColorProcessor colorSensor = new PredominantColorProcessor.Builder()
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.1, 0.1, 0.1, -0.1))
+                .setSwatches(
+                        PredominantColorProcessor.Swatch.ARTIFACT_GREEN,
+                        PredominantColorProcessor.Swatch.ARTIFACT_PURPLE,
+                        //PredominantColorProcessor.Swatch.RED,
+                        //PredominantColorProcessor.Swatch.BLUE,
+                        //PredominantColorProcessor.Swatch.YELLOW,
+                        PredominantColorProcessor.Swatch.BLACK,
+                        PredominantColorProcessor.Swatch.WHITE)
+                .build();
+
+        /*
+         * Build a vision portal to run the Color Sensor process.
+         *
+         *  - Add the colorSensor process created above.
+         *  - Set the desired video resolution.
+         *      Since a high resolution will not improve this process, choose a lower resolution
+         *      supported by your camera.  This will improve overall performance and reduce latency.
+         *  - Choose your video source.  This may be
+         *      .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))  .....   for a webcam
+         *  or
+         *      .setCamera(BuiltinCameraDirection.BACK)    ... for a Phone Camera
+         */
+        VisionPortal portal = new VisionPortal.Builder()
+                .addProcessor(colorSensor)
+                .setCameraResolution(new Size(320, 240))
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .build();
+
+        telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
         waitForStart();
         runtime.reset();
@@ -191,24 +205,24 @@ public class GPPOmniOpMode extends LinearOpMode {
 
         // Initialize AprilTag before waitForStart.
 
-        colorSensor = new PredominantColorProcessor.Builder()
-                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.1, 0.1, 0.1, -0.1))
+        /*colorSensor = new PredominantColorProcessor.Builder()
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.4, 0.4, 0.4, -0.4))
                 .setSwatches(
                         PredominantColorProcessor.Swatch.ARTIFACT_GREEN,
                         PredominantColorProcessor.Swatch.ARTIFACT_PURPLE,
-                        // PredominantColorProcessor.Swatch.RED,
+                        PredominantColorProcessor.Swatch.WHITE,
                         //PredominantColorProcessor.Swatch.BLUE,
                         //PredominantColorProcessor.Swatch.YELLOW,
                         PredominantColorProcessor.Swatch.BLACK)
                 //PredominantColorProcessor.Swatch.WHITE)
-                .build();
+                .build(); */
 
 
         //telemetry.addData("Webcam 1 available", hardwareMap.get(WebcamName.class, "Webcam 1") != null);
-        telemetry.addData("Webcam 2 available", hardwareMap.get(WebcamName.class, "Webcam 1") != null);
+        telemetry.addData("Webcam 1 available", hardwareMap.get(WebcamName.class, "Webcam 1") != null);
         telemetry.update();
 
-        initAprilTag();
+        //initAprilTag();
 
 
         /*
@@ -232,7 +246,7 @@ public class GPPOmniOpMode extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+        PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
         // Run until the end of the match (driver presses STOP)
         try {
@@ -261,23 +275,37 @@ public class GPPOmniOpMode extends LinearOpMode {
                         intake.setPower(0);
                     }
                 }
-                if (gamepad2.a) {
-                    outtake.setPower(0.67);
+
+                if (gamepad2.aWasPressed()) {
+                    if (outtakePower != 0.6f) {
+                        outtakePower = 0.6f;
+                    }
+                    if (outtakePower == 0.6f) {
+                        outtakePower = 1.0f;
+                    }
                 }
                 if (gamepad2.b) {
-                    outtake.setPower(0);
+                    outtakePower = 0f;
                 }
                 if (gamepad2.back) {
-                    outtake.setPower(-0.3);
+                    outtakePower = -0.3f;
                 }
 
+                outtake.setPower(outtakePower);
+
+                //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
+                //swatchResult = result.closestSwatch.toString();
+                //telemetry.addData("Color Scanned", swatchResult);
+
                 if (left_bumper_was_pressed()) { //control for autosort
-                    PredominantColorProcessor.Result result = colorSensor.getAnalysis();
-                    if ((((result.closestSwatch.toString().equals("ARTIFACT_PURPLE")) || (result.closestSwatch.toString().equals("ARTIFACT_GREEN"))))) {
-                        fullRotation(1, 1, true, result.closestSwatch.toString());
+                    PredominantColorProcessor.Result result2 = colorSensor.getAnalysis();
+                    swatchResult = result2.closestSwatch.toString();
+                    if ((((swatchResult.equals("ARTIFACT_PURPLE")) || (swatchResult.equals("ARTIFACT_GREEN"))))) {
+                        fullRotation(1, 1, true, swatchResult);
                     } else {
+                        telemetry.addData("Color Scanned", swatchResult);
                         telemetry.addData("Did not rotate", "No color detected");
-                        telemetry.update();
+                        //telemetry.update();
                     }
                 }
 
@@ -409,9 +437,7 @@ public class GPPOmniOpMode extends LinearOpMode {
                 telemetry.addData("colors 1", colors[1]);
                 telemetry.addData("colors 2", colors[2]);
                 telemetry.addData("Counter", counter);
-
-                PredominantColorProcessor.Result telResult = colorSensor.getAnalysis();
-                telemetry.addData("Current color detected", telResult);
+                telemetry.addData("Output Power: ", outtakePower);
 
 
 
@@ -420,25 +446,29 @@ public class GPPOmniOpMode extends LinearOpMode {
 
             }
         }
-        finally {
+        finally { //don't crash when stop
             // This ALWAYS runs, even if STOP is pressed
-            if (myVisionPortal_1 != null) {
-                myVisionPortal_1.close();
-            }
-            if (myVisionPortal_2 != null) {
-                myVisionPortal_2.close();
+            try {
+                if (portal != null) {
+                    portal.close();
+                }
+            } catch (Exception e) {
+                // Ignore errors closing portal 1
             }
 
             // Stop all motors
-            frontLeft.setPower(0);
-            frontRight.setPower(0);
-            backLeft.setPower(0);
-            backRight.setPower(0);
-            intake.setPower(0);
-            magazine.setPower(0);
-            outtake.setPower(0);
+            try {
+                frontLeft.setPower(0);
+                frontRight.setPower(0);
+                backLeft.setPower(0);
+                backRight.setPower(0);
+                intake.setPower(0);
+                magazine.setPower(0);
+                outtake.setPower(0);
+            } catch (Exception e) {
+                // Ignore errors stopping motors
+            }
         }
-
         }
 
 
@@ -461,6 +491,8 @@ public class GPPOmniOpMode extends LinearOpMode {
     }
     public void fullRotation ( float numOfRotations, float magazinePower, boolean assignNewColor, String colorResult)
     {
+        if (!opModeIsActive()) return;
+
         if (assignNewColor) {
             //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
@@ -529,14 +561,14 @@ public class GPPOmniOpMode extends LinearOpMode {
         //for (int i = 0; i < 3; i++) {
         theoreticalSlot = topSlotNumber;
         numRotationsRequired = 0f;
-        if (colors[(int) theoreticalSlot].isEmpty()) {
+        /*if ((colors[(int) theoreticalSlot] == null || colors[(int) theoreticalSlot].isEmpty())) {
             telemetry.addData("value in array is empty", "ball skipped and counter reset");
             telemetry.update();
             fullRotation(0.5f, 1, false,null);
             counter = 0;
             sleep(500);
             return;
-        }
+        }*/
         //if ((colors[(int) theoreticalSlot]) != (null)) {
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[ballNumber]))) {
                 numRotationsRequired += 1f;
@@ -551,19 +583,13 @@ public class GPPOmniOpMode extends LinearOpMode {
                     numRotationsRequired = -1f;
                 }
                 telemetry.addData(colors[(int) theoreticalSlot], motif[ballNumber]);
-                telemetry.update();
+                //telemetry.update();
             }
         //}
             /*if (numRotationsRequired == 2f) { //this makes it rotate in the other direction instead of rotating twice
                 numRotationsRequired = -1f;
             }*/
         telemetry.addData("numRotationsRequired", numRotationsRequired);
-        telemetry.update();
-        fullRotation(numRotationsRequired, 1F, false, "none");
-        //while (magazine.isBusy() && opModeIsActive()) {
-        //    telemetry.addData("status", "moving");
-        //}
-        colors[(int) theoreticalSlot] = "";
         telemetry.addData("launching", ballNumber);
         telemetry.addData("Bottom Slot", slotNumber);
         telemetry.addData("Top Slot", topSlotNumber);
@@ -573,6 +599,14 @@ public class GPPOmniOpMode extends LinearOpMode {
         telemetry.addData("colors 1", colors[1]);
         telemetry.addData("colors 2", colors[2]);
         telemetry.update();
+        //telemetry.update();
+
+        colors[(int) theoreticalSlot] = "";
+        fullRotation(numRotationsRequired, 1F, false, "none");
+        //while (magazine.isBusy() && opModeIsActive()) {
+        //    telemetry.addData("status", "moving");
+        //}
+
         //sleep(2000);//launch
         //}
 
@@ -594,22 +628,22 @@ public class GPPOmniOpMode extends LinearOpMode {
 //Taken from the TwoVisionPortals.java file. Not sure what these mean but these are just methods
 //*******************************************
 
-    private void initAprilTag() {
-        AprilTagProcessor.Builder myAprilTagProcessorBuilder;
+    //private void initAprilTag() {
+        //AprilTagProcessor.Builder myAprilTagProcessorBuilder;
 
         // First, create an AprilTagProcessor.Builder.
-        myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
+        //myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
         // Create each AprilTagProcessor by calling build.
-        myAprilTagProcessor_1 = myAprilTagProcessorBuilder.build();
+        //myAprilTagProcessor_1 = myAprilTagProcessorBuilder.build();
         //myAprilTagProcessor_2 = myAprilTagProcessorBuilder.build();
-        Make_first_VisionPortal();
-        Make_second_VisionPortal();
-    }
+        //Make_first_VisionPortal();
+        //Make_second_VisionPortal();
+    //}
 
     /**
      * Describe this function...
      */
-    private void Make_first_VisionPortal() {
+    /*private void Make_first_VisionPortal() {
         // Create a VisionPortal.Builder and set attributes related to the first camera.
         myVisionPortalBuilder = new VisionPortal.Builder();
         if (USE_WEBCAM_1) {
@@ -632,65 +666,18 @@ public class GPPOmniOpMode extends LinearOpMode {
         myVisionPortalBuilder.setLiveViewContainerId(Portal_1_View_ID);
         // Create a VisionPortal by calling build.
         myVisionPortal_1 = myVisionPortalBuilder.build();
-    }
+    }*/
 
     /**
      * Describe this function...
      */
-    private void Make_second_VisionPortal() {
-        VisionPortal.Builder secondPortalBuilder = new VisionPortal.Builder();
-        if (USE_WEBCAM_2) {
-            // Use a webcam.
-            secondPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        } else {
-            // Use the device's back camera.
-            secondPortalBuilder.setCamera(BuiltinCameraDirection.BACK);
-        }
-        // Manage USB bandwidth of two camera streams, by adjusting resolution from default 640x480.
-        // Set the camera resolution.
-        secondPortalBuilder.setCameraResolution(new Size(320, 240));
-        // Manage USB bandwidth of two camera streams, by selecting Streaming Format.
-        // Set the stream format.
-        secondPortalBuilder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
-        // Add myAprilTagProcessor to the VisionPortal.Builder.
-        //myVisionPortalBuilder.addProcessor(myAprilTagProcessor_2);
-        secondPortalBuilder.addProcessor(colorSensor);
-        // Add the Portal View ID to the VisionPortal.Builder
-        // Set the camera monitor view id.
-        secondPortalBuilder.setLiveViewContainerId(Portal_2_View_ID);
-        // Create a VisionPortal by calling build.
-        myVisionPortal_2 = secondPortalBuilder.build();
-    }
-
-    /**
-     * Describe this function...
-     */
-    private void Toggle_camera_streams() {
-        // Manage USB bandwidth of two camera streams, by turning on or off.
-        if (gamepad1.dpad_down) {
-            // Temporarily stop the streaming session. This can save CPU
-            // resources, with the ability to resume quickly when needed.
-            myVisionPortal_1.stopStreaming();
-        } else if (gamepad1.dpad_up) {
-            // Resume the streaming session if previously stopped.
-            myVisionPortal_1.resumeStreaming();
-        }
-        if (gamepad1.dpad_left) {
-            // Temporarily stop the streaming session. This can save CPU
-            // resources, with the ability to resume quickly when needed.
-            myVisionPortal_2.stopStreaming();
-        } else if (gamepad1.dpad_right) {
-            // Resume the streaming session if previously stopped.
-            myVisionPortal_2.resumeStreaming();
-        }
-    }
 
     /**
      * Display info (using telemetry) for a recognized AprilTag.
      *
      * @return
      */
-    private String AprilTag_telemetry_for_Portal_1() {
+    /*private String AprilTag_telemetry_for_Portal_1() {
         List<AprilTagDetection> myAprilTagDetections_1;
         AprilTagDetection thisDetection_1;
 
@@ -715,53 +702,18 @@ public class GPPOmniOpMode extends LinearOpMode {
             //telemetry.addLine("==== (ID " + thisDetection_1.id + ") Unknown");
             return null; */
             //telemetry.addLine("Center " + JavaUtil.formatNumber(thisDetection_1.center.x, 6, 0) + "" + JavaUtil.formatNumber(thisDetection_1.center.y, 6, 0) + " (pixels)");
-        }
-        return null;
-    }
+        //}
+        //return null;
+    //}
 
 //}
 
     /**
      * Display info (using telemetry) for a recognized AprilTag.
      */
-    private void AprilTag_telemetry_for_Portal_2() {
-        return;
-    /*
-    //List<AprilTagDetection> myAprilTagDetections_2;
-    //AprilTagDetection thisDetection_2;
-
-    // Get a list of AprilTag detections.
-    //myAprilTagDetections_2 = myAprilTagProcessor_2.getDetections();
-    myAprilTagDetections_2 = null; ///TO DISABLE THIS METHOD. IF YOU NEED IT GO BACK TO THE SAMPLE FILE
-    telemetry.addLine("");
-    telemetry.addData("Portal 2 - # AprilTags Detected", JavaUtil.listLength(myAprilTagDetections_2));
-    // Iterate through list and call a function to display info for each recognized AprilTag.
-    for (AprilTagDetection thisDetection_2_item : myAprilTagDetections_2) {
-        thisDetection_2 = thisDetection_2_item;
-        // Display info about the detection.
-        telemetry.addLine("");
-        if (thisDetection_2.metadata != null) {
-            telemetry.addLine("==== (ID " + thisDetection_2.id + ") " + thisDetection_2.metadata.name);
-            telemetry.addLine("XYZ " + JavaUtil.formatNumber(thisDetection_2.ftcPose.x, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_2.ftcPose.y, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_2.ftcPose.z, 6, 1) + "  (inch)");
-            telemetry.addLine("PRY " + JavaUtil.formatNumber(thisDetection_2.ftcPose.yaw, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_2.ftcPose.pitch, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_2.ftcPose.roll, 6, 1) + "  (deg)");
-            telemetry.addLine("RBE " + JavaUtil.formatNumber(thisDetection_2.ftcPose.range, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_2.ftcPose.bearing, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_2.ftcPose.elevation, 6, 1) + "  (inch, deg, deg)");
-        } else {
-            telemetry.addLine("==== (ID " + thisDetection_2.id + ") Unknown");
-            telemetry.addLine("Center " + JavaUtil.formatNumber(thisDetection_2.center.x, 6, 0) + "" + JavaUtil.formatNumber(thisDetection_2.center.y, 6, 0) + " (pixels)");
-        }
-    }
- */ }
-
     /**
      * Describe this function...
      */
-    private void AprilTag_telemetry_legend() {
-        telemetry.addLine("");
-        telemetry.addLine("key:");
-        telemetry.addLine("XYZ = X (Right), Y (Forward), Z (Up) dist.");
-        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
-        telemetry.addLine("RBE = Range, Bearing & Elevation");
-    }
 
     private boolean dpad_up_was_pressed() {
         return currentGamepad2.dpad_up && !previousGamepad2.dpad_up;
@@ -782,3 +734,7 @@ public class GPPOmniOpMode extends LinearOpMode {
         return currentGamepad2.dpad_down && !previousGamepad2.dpad_down;
     }
 }
+
+
+
+
