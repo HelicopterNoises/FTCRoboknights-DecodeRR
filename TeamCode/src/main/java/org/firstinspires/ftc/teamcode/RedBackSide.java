@@ -175,7 +175,7 @@ public class RedBackSide extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        Pose2d beginPose = new Pose2d(59.49, 12.51, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
+        Pose2d beginPose = new Pose2d(60.68, 12.34, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -247,18 +247,23 @@ public class RedBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
                         .build());*/
+        outtake.setPower(0.61);
         scanApriltag();
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(56.45, 12.68), Math.toRadians(165))
-                        .build());
-
-        outtake.setPower(1);
-        sleep(2000);
+                        .splineTo(new Vector2d(51.55, 18.59), Math.toRadians(160))
+                .build());
+        sleep(4000);
 
         fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
+
+        Actions.runBlocking(
+                drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(19.94, 10.65), Math.toRadians(177.19))
+                        .build());
+
 
 
 
@@ -320,7 +325,8 @@ public class RedBackSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) {
+        boolean readyToGo = false;
+        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) && !readyToGo) {
             if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
@@ -347,6 +353,7 @@ public class RedBackSide extends LinearOpMode {
                                 magazine.setPower(-0.2);
                             } else {
                                 magazine.setPower(0);
+                                readyToGo = true;
                                 PDIcontroller = false;
                             }
                         }

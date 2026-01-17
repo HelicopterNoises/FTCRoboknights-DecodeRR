@@ -175,7 +175,7 @@ public class BlueBackSide extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        Pose2d beginPose = new Pose2d(59.49, 12.51, Math.toRadians(180.74));
+        Pose2d beginPose = new Pose2d(60.68, -12.34, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -247,18 +247,23 @@ public class BlueBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
                         .build());*/
+        outtake.setPower(0.61);
         scanApriltag();
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(53.92, 16.06), Math.toRadians(158.25))
+                        .splineTo(new Vector2d(51.55, -18.59), Math.toRadians(195))
                         .build());
-
-        outtake.setPower(1);
-        sleep(2000);
+        sleep(4000);
 
         fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
+
+        Actions.runBlocking(
+                drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(19.94, -10.65), Math.toRadians(177.19))
+                        .build());
+
 
 
 
@@ -320,7 +325,8 @@ public class BlueBackSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) {
+        boolean readyToGo = false;
+        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) && !readyToGo) {
             if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
@@ -348,6 +354,7 @@ public class BlueBackSide extends LinearOpMode {
                             } else {
                                 magazine.setPower(0);
                                 PDIcontroller = false;
+                                readyToGo = true;
                             }
                         }
                     }
@@ -450,7 +457,7 @@ public class BlueBackSide extends LinearOpMode {
             fullRotation(numRotationsRequired, 0.4F, false);
             sleep(2000);
             //while (magazine.isBusy() && opModeIsActive()) {
-                //hold loop while function moving
+            //hold loop while function moving
             //}
             colors[(int)theoreticalSlot] = "";
             telemetry.addData("launching", i);

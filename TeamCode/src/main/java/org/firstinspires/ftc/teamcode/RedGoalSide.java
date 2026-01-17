@@ -38,8 +38,6 @@ public class RedGoalSide extends LinearOpMode {
     private Limelight3A limelight;
 
 
-
-
     private ElapsedTime runtime = new ElapsedTime();
     private PredominantColorProcessor colorSensor;
 
@@ -95,9 +93,6 @@ public class RedGoalSide extends LinearOpMode {
     String aprilTagID = String.valueOf('0'); //used for old camera processor
     int tagId = 0;
     int currentMagazinePosition = 0;
-
-
-
 
 
     @Override
@@ -175,7 +170,7 @@ public class RedGoalSide extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        Pose2d beginPose = new Pose2d(48.17, 47.49, Math.toRadians(227.05));
+        Pose2d beginPose = (new Pose2d(-47.32, 47.32, Math.toRadians(-45)));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -245,17 +240,16 @@ public class RedGoalSide extends LinearOpMode {
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
+                        .splineTo(new Vector2d(-0.68, 23.32), Math.toRadians(198.64))
                         .build());
         scanApriltag();
+        outtake.setPower(0.6);
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(23.83, 18.08), Math.toRadians(43.43))
+                        .splineTo(new Vector2d(-13.69, 11.32), Math.toRadians(117.46))
                         .build());
 
-        outtake.setPower(0.6);
-        sleep(2000);
 
         fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
@@ -391,7 +385,7 @@ public class RedGoalSide extends LinearOpMode {
         } */
 
 
-    public void launchMotif (int aprilTagID) {
+    public void launchMotif(int aprilTagID) {
         float theoreticalSlot = topSlotNumber;
         float numRotationsRequired = 0f;
         String[] motif = new String[3];
@@ -421,7 +415,7 @@ public class RedGoalSide extends LinearOpMode {
         for (int i = 0; i < 3; i++) {
             theoreticalSlot = topSlotNumber;
             numRotationsRequired = 0f;
-            if (colors[(int)theoreticalSlot].equals(null)) {
+            if (colors[(int) theoreticalSlot].equals(null)) {
                 telemetry.addData("value in array equals null", "skipped");
                 telemetry.update();
                 sleep(500);
@@ -450,13 +444,13 @@ public class RedGoalSide extends LinearOpMode {
             fullRotation(numRotationsRequired, 0.4F, false);
             sleep(2000);
             //while (magazine.isBusy() && opModeIsActive()) {
-                //hold loop while function moving
+            //hold loop while function moving
             //}
-            colors[(int)theoreticalSlot] = "";
+            colors[(int) theoreticalSlot] = "";
             telemetry.addData("launching", i);
             telemetry.addData("Bottom Slot", slotNumber);
             telemetry.addData("Top Slot", topSlotNumber);
-            telemetry.addData("current color", colors[(int)theoreticalSlot]);
+            telemetry.addData("current color", colors[(int) theoreticalSlot]);
             telemetry.addData("Current motif", motif[i]);
             telemetry.addData("colors 0", colors[0]);
             telemetry.addData("colors 1", colors[1]);
@@ -638,7 +632,8 @@ public class RedGoalSide extends LinearOpMode {
             telemetry.addLine("Center " + JavaUtil.formatNumber(thisDetection_2.center.x, 6, 0) + "" + JavaUtil.formatNumber(thisDetection_2.center.y, 6, 0) + " (pixels)");
         }
     }
- */ }
+ */
+    }
 
     /**
      * Describe this function...
@@ -675,6 +670,32 @@ public class RedGoalSide extends LinearOpMode {
         }
     }
 
+    public void jitter(int localMagazinePos) {
+        localMagazinePos += 3;
+        int newtime = Math.toIntExact((System.nanoTime() + 500000000)); //for 5 seconds = 5*10^9 nanoseconds
+        while (opModeIsActive() && newtime > System.nanoTime()) {
+            if (localMagazinePos - magazine.getCurrentPosition() >= 1) {
+                magazine.setPower(0.4);
+            } else {
+                if (localMagazinePos - magazine.getCurrentPosition() <= -1) {
+                    magazine.setPower(-0.4);
+                }
+                }
+            }
+        while (opModeIsActive()) {
+        if (localMagazinePos - magazine.getCurrentPosition() >= 2 && MagazinePositiveMotion == true) {
+            magazine.setPower(0.2);
+        } else {
+            if (localMagazinePos - magazine.getCurrentPosition() <= -2 && MagazinePositiveMotion == false) {
+                magazine.setPower(-0.2);
+            } else {
+                magazine.setPower(0);
+                break;
+            }
+        }
+        }
+
+    }
 }
 
 

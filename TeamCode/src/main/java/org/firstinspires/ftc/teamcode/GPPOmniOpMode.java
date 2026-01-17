@@ -24,7 +24,7 @@ import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 import java.util.List;
 
 
-@TeleOp(name = "21 GPP - 2026 Omni Op Mode OBJ")
+@TeleOp(name = "2026 Omni Op Mode")
 public class GPPOmniOpMode extends LinearOpMode {
 
     private DcMotor frontLeft;
@@ -178,6 +178,7 @@ public class GPPOmniOpMode extends LinearOpMode {
 
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
+        telemetry.addData("Press A for GPP/21", "Press B for PGP/22", "Press X for PPG/23");
 
         waitForStart();
         runtime.reset();
@@ -253,6 +254,9 @@ public class GPPOmniOpMode extends LinearOpMode {
             while (opModeIsActive()) {
                 previousGamepad2.copy(currentGamepad2);
                 currentGamepad2.copy(gamepad2);
+
+
+
                 // Start Section: Drive
                 // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
                 // Note: pushing stick forward gives negative value
@@ -277,11 +281,11 @@ public class GPPOmniOpMode extends LinearOpMode {
                 }
 
                 if (gamepad2.aWasPressed()) {
-                    if (outtakePower != 0.6f) {
-                        outtakePower = 0.6f;
+                    if (outtakePower != 0.5f) {
+                        outtakePower = 0.5f;
                     }
-                    if (outtakePower == 0.6f) {
-                        outtakePower = 1.0f;
+                    else if (outtakePower == 0.5f) {
+                        outtakePower = 0.6f;
                     }
                 }
                 if (gamepad2.b) {
@@ -322,11 +326,15 @@ public class GPPOmniOpMode extends LinearOpMode {
                             magazine.setPower(0.7);
                             magazinePos = magazine.getCurrentPosition();
                             //BottomAligned = null;
+                            magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                         } else {
                             if (gamepad2.right_stick_button) {
                                 MagazinePositiveMotion = false;
                                 magazine.setPower(-0.7);
                                 magazinePos = magazine.getCurrentPosition();
+                                magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                             } else {
                                 if (dpad_right_was_pressed()) {
                                     MagazinePositiveMotion = true;
@@ -438,7 +446,18 @@ public class GPPOmniOpMode extends LinearOpMode {
                 telemetry.addData("colors 2", colors[2]);
                 telemetry.addData("Counter", counter);
                 telemetry.addData("Output Power: ", outtakePower);
+                telemetry.addData("Press A for GPP/21", "Press B for PGP/22", "Press X for PPG/23");
+                telemetry.addData("Current ID:", aprilTagID);
 
+                if (gamepad1.a) {
+                    aprilTagID = "21";
+                }
+                if (gamepad1.b) {
+                    aprilTagID = "22";
+                }
+                if (gamepad1.x) {
+                    aprilTagID = "23";
+                }
 
 
                 telemetry.update();
