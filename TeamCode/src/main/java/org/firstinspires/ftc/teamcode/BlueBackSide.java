@@ -35,6 +35,7 @@ public class BlueBackSide extends LinearOpMode {
     private DcMotorEx magazine = null;
     private DcMotor outtake = null;
 
+
     private Limelight3A limelight;
 
 
@@ -56,6 +57,10 @@ public class BlueBackSide extends LinearOpMode {
 
     boolean MagazinePositiveMotion;
     boolean PDIcontroller;
+    private DcMotor frontLeft;
+    private DcMotor backLeft;
+    private DcMotor frontRight;
+    private DcMotor backRight;
 
 
     private void initMultiPortals() {
@@ -104,6 +109,13 @@ public class BlueBackSide extends LinearOpMode {
     public void runOpMode() {
         magazine = (DcMotorEx) hardwareMap.get(DcMotor.class, "magazine");
         outtake = hardwareMap.get(DcMotor.class, "outtake");
+
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight"); //map limelight to robot configuration
         telemetry.setMsTransmissionInterval(11); //For the limelight
@@ -247,22 +259,37 @@ public class BlueBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
                         .build());*/
-        outtake.setPower(0.61);
+        outtake.setPower(0.59);
         scanApriltag();
+
+        //sleep for Free Wifi
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(51.55, -18.59), Math.toRadians(195))
+                        .splineTo(new Vector2d(51.55, -18.59), Math.toRadians(196))
                         .build());
-        sleep(4000);
+        sleep(6000);
 
         fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
 
-        Actions.runBlocking(
+        frontLeft.setPower(0.3);
+        frontRight.setPower(0.3);
+        backLeft.setPower(0.3);
+        backRight.setPower(0.3);
+        sleep(1000);
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+
+
+
+        /*Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(19.94, -10.65), Math.toRadians(177.19))
-                        .build());
+                        .splineTo(new Vector2d(51.55, 18.67), Math.toRadians(270))
+                        .build());*/
 
 
 
@@ -326,7 +353,7 @@ public class BlueBackSide extends LinearOpMode {
         }
         int magazinePos = (int) floatTargetPosition;
         boolean readyToGo = false;
-        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) && !readyToGo) {
+        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 0)) {
             if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
@@ -354,7 +381,7 @@ public class BlueBackSide extends LinearOpMode {
                             } else {
                                 magazine.setPower(0);
                                 PDIcontroller = false;
-                                readyToGo = true;
+                                //readyToGo = true;
                             }
                         }
                     }
@@ -455,7 +482,7 @@ public class BlueBackSide extends LinearOpMode {
             telemetry.addData("numRotationsRequired", numRotationsRequired);
             telemetry.update();
             fullRotation(numRotationsRequired, 0.4F, false);
-            sleep(2000);
+            sleep(1750);
             //while (magazine.isBusy() && opModeIsActive()) {
             //hold loop while function moving
             //}
@@ -469,7 +496,7 @@ public class BlueBackSide extends LinearOpMode {
             telemetry.addData("colors 1", colors[1]);
             telemetry.addData("colors 2", colors[2]);
             telemetry.update();
-            sleep(1500);//launch
+            //sleep(1500);//launch
         }
 
     }

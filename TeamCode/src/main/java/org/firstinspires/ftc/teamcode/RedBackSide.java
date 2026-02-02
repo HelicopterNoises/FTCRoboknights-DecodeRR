@@ -254,15 +254,15 @@ public class RedBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(51.55, 18.59), Math.toRadians(160))
                 .build());
-        sleep(4000);
+        sleep(6000);
 
         fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
 
-        Actions.runBlocking(
+        /*Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(19.94, 10.65), Math.toRadians(177.19))
-                        .build());
+                        .splineTo(new Vector2d(51.55, -18.65), Math.toRadians(90))
+                        .build());*/
 
 
 
@@ -326,12 +326,12 @@ public class RedBackSide extends LinearOpMode {
         }
         int magazinePos = (int) floatTargetPosition;
         boolean readyToGo = false;
-        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) && !readyToGo) {
-            if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
+        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 0)) {
+            if (magazinePos - magazine.getCurrentPosition() >= 13 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
             } else {
-                if (magazinePos - magazine.getCurrentPosition() <= -11 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() <= -13 && MagazinePositiveMotion == false) {
                     magazine.setPower(-1);
                     PDIcontroller = false;
                 } else {
@@ -353,7 +353,7 @@ public class RedBackSide extends LinearOpMode {
                                 magazine.setPower(-0.2);
                             } else {
                                 magazine.setPower(0);
-                                readyToGo = true;
+                                //readyToGo = true;
                                 PDIcontroller = false;
                             }
                         }

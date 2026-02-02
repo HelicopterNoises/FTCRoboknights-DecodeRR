@@ -243,11 +243,12 @@ public class RedGoalSide extends LinearOpMode {
                         .splineTo(new Vector2d(-0.68, 23.32), Math.toRadians(198.64))
                         .build());
         scanApriltag();
-        outtake.setPower(0.6);
+        outtake.setPower(0.5);
+        sleep(6000);
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(-13.69, 11.32), Math.toRadians(117.46))
+                        .splineTo(new Vector2d(-13.69, 11.32), Math.toRadians(125))
                         .build());
 
 
@@ -314,7 +315,7 @@ public class RedGoalSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) {
+        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 0) {
             if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;

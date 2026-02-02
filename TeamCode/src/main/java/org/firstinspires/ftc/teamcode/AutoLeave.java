@@ -29,11 +29,12 @@ import java.util.List;
 
 
 @Config
-@Autonomous(name = "Blue Goal Side", group = "Autonomous")
-public class BlueGoalSide extends LinearOpMode {
+@Autonomous(name = "Leave", group = "Autonomous")
+public class AutoLeave extends LinearOpMode {
 
     private DcMotorEx magazine = null;
     private DcMotor outtake = null;
+
 
     private Limelight3A limelight;
 
@@ -56,6 +57,10 @@ public class BlueGoalSide extends LinearOpMode {
 
     boolean MagazinePositiveMotion;
     boolean PDIcontroller;
+    private DcMotor frontLeft;
+    private DcMotor backLeft;
+    private DcMotor frontRight;
+    private DcMotor backRight;
 
 
     private void initMultiPortals() {
@@ -104,6 +109,13 @@ public class BlueGoalSide extends LinearOpMode {
     public void runOpMode() {
         magazine = (DcMotorEx) hardwareMap.get(DcMotor.class, "magazine");
         outtake = hardwareMap.get(DcMotor.class, "outtake");
+
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight"); //map limelight to robot configuration
         telemetry.setMsTransmissionInterval(11); //For the limelight
@@ -175,7 +187,7 @@ public class BlueGoalSide extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        Pose2d beginPose = new Pose2d(-48.00, -48.00, Math.toRadians(43.03));
+        Pose2d beginPose = new Pose2d(60.68, -12.34, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -243,21 +255,42 @@ public class BlueGoalSide extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        Actions.runBlocking(
+        /*Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(-24.17, -24.17), Math.toRadians(153.19))                        .build());
-        scanApriltag();
+                        .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
+                        .build());*/
+        //outtake.setPower(0.6);
+        //scanApriltag();
 
-        Actions.runBlocking(
+        //sleep for Free Wifi
+
+        /*Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(-11.83, -2.54), Math.toRadians(222.97))
-                        .build());
+                        .splineTo(new Vector2d(51.55, -18.59), Math.toRadians(196))
+                        .build()); */
+        //sleep(6000);
 
-        outtake.setPower(0.6);
-        sleep(2000);
+        //fullRotation(0.5f, 0.3f, false);
+        //launchMotif(tagId);
 
-        fullRotation(0.5f, 0.3f, false);
-        launchMotif(tagId);
+        frontLeft.setPower(0.3);
+        frontRight.setPower(0.3);
+        backLeft.setPower(0.3);
+        backRight.setPower(0.3);
+        sleep(1000);
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+
+
+
+        /*Actions.runBlocking(
+                drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(51.55, 18.67), Math.toRadians(270))
+                        .build());*/
+
 
 
 
@@ -319,10 +352,8 @@ public class BlueGoalSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        //magazine.setTargetPosition(magazinePos);
-        //magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //magazine.setPower(0.8);
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) {
+        boolean readyToGo = false;
+        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 0)) {
             if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
@@ -350,6 +381,7 @@ public class BlueGoalSide extends LinearOpMode {
                             } else {
                                 magazine.setPower(0);
                                 PDIcontroller = false;
+                                //readyToGo = true;
                             }
                         }
                     }
@@ -450,9 +482,9 @@ public class BlueGoalSide extends LinearOpMode {
             telemetry.addData("numRotationsRequired", numRotationsRequired);
             telemetry.update();
             fullRotation(numRotationsRequired, 0.4F, false);
-            sleep(2000);
+            sleep(1750);
             //while (magazine.isBusy() && opModeIsActive()) {
-                //hold loop while function moving
+            //hold loop while function moving
             //}
             colors[(int)theoreticalSlot] = "";
             telemetry.addData("launching", i);
@@ -464,7 +496,7 @@ public class BlueGoalSide extends LinearOpMode {
             telemetry.addData("colors 1", colors[1]);
             telemetry.addData("colors 2", colors[2]);
             telemetry.update();
-            sleep(1500);//launch
+            //sleep(1500);//launch
         }
 
     }

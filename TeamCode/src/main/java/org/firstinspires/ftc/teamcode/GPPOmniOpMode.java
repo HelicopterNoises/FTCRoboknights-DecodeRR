@@ -274,18 +274,21 @@ public class GPPOmniOpMode extends LinearOpMode {
                     intake.setPower(1);
                 } else {
                     if (gamepad2.x) {
-                        intake.setPower(-0.4);
+                        intake.setPower(-0.6);
                     } else {
                         intake.setPower(0);
                     }
                 }
 
                 if (gamepad2.aWasPressed()) {
-                    if (outtakePower != 0.5f) {
+                    if (outtakePower == 0f) {
                         outtakePower = 0.5f;
                     }
-                    else if (outtakePower == 0.5f) {
-                        outtakePower = 0.6f;
+                    else if (outtakePower == 0.8f) {
+                        outtakePower = 0;
+                    }
+                    else {
+                    outtakePower += 0.05f;
                     }
                 }
                 if (gamepad2.b) {
@@ -326,15 +329,13 @@ public class GPPOmniOpMode extends LinearOpMode {
                             magazine.setPower(0.7);
                             magazinePos = magazine.getCurrentPosition();
                             //BottomAligned = null;
-                            magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
                         } else {
                             if (gamepad2.right_stick_button) {
                                 MagazinePositiveMotion = false;
                                 magazine.setPower(-0.7);
                                 magazinePos = magazine.getCurrentPosition();
-                                magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
                             } else {
                                 if (dpad_right_was_pressed()) {
                                     MagazinePositiveMotion = true;
@@ -383,11 +384,11 @@ public class GPPOmniOpMode extends LinearOpMode {
                 //}
 
                 /// move the magazine with custom "PID"
-                if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
+                if (magazinePos - magazine.getCurrentPosition() >= 14 && MagazinePositiveMotion == true) {
                     magazine.setPower(1);
                     PDIcontroller = false;
                 } else {
-                    if (magazinePos - magazine.getCurrentPosition() <= -11 && MagazinePositiveMotion == false) {
+                    if (magazinePos - magazine.getCurrentPosition() <= -14 && MagazinePositiveMotion == false) {
                         magazine.setPower(-1);
                         PDIcontroller = false;
                     } else {
@@ -535,7 +536,7 @@ public class GPPOmniOpMode extends LinearOpMode {
         //Make motor move with custom PID controller -- This was written by Claude because I don't understand PID controllers
 
         //double power = 0;
-        floatTargetPosition = floatTargetPosition + (COUNTS_PER_FULL_REV * numOfRotations);
+        floatTargetPosition = magazinePos + (COUNTS_PER_FULL_REV * numOfRotations);
         magazinePos = (int) floatTargetPosition;
         //magazine.setTargetPosition((int) floatTargetPosition);
     }
