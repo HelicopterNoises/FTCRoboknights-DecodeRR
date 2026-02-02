@@ -73,7 +73,7 @@ public class GPPOmniOpMode extends LinearOpMode {
     String swatchResult;
     float outtakePower = 0f;
 
-    String aprilTagID = String.valueOf("21");
+    //String aprilTagID = String.valueOf("21");
     int currentMagazinePosition = 0;
 
     private Gamepad currentGamepad2 = new Gamepad();
@@ -270,17 +270,17 @@ public class GPPOmniOpMode extends LinearOpMode {
                 } else {
                     driveSpeed = 1;
                 }
-                if (gamepad2.y) {
-                    intake.setPower(1);
-                } else {
-                    if (gamepad2.x) {
-                        intake.setPower(-0.6);
-                    } else {
-                        intake.setPower(0);
-                    }
-                }
+
+                intake.setPower(gamepad2.right_stick_y);
 
                 if (gamepad2.aWasPressed()) {
+                    launchBall("ARTIFACT_GREEN");
+                }
+                if (gamepad2.bWasPressed()) {
+                    launchBall("ARTIFACT_PURPLE");
+                }
+
+                if (gamepad2.x) {
                     if (outtakePower == 0f) {
                         outtakePower = 0.5f;
                     }
@@ -288,14 +288,11 @@ public class GPPOmniOpMode extends LinearOpMode {
                         outtakePower = 0;
                     }
                     else {
-                    outtakePower += 0.05f;
+                    outtakePower += 0f;
                     }
                 }
-                if (gamepad2.b) {
+                if (gamepad2.y) {
                     outtakePower = 0f;
-                }
-                if (gamepad2.back) {
-                    outtakePower = -0.3f;
                 }
 
                 outtake.setPower(outtakePower);
@@ -362,25 +359,7 @@ public class GPPOmniOpMode extends LinearOpMode {
                         }
                     }
                 }
-                if (right_trigger_was_pressed()) {
-                    if (counter == 0) { //On the first rotation, align
-                        if (colors[0] != null && colors[1] != null && colors[2] != null) {
-                            fullRotation(0.5f, 1f, false, "null");
-                        }
-                    } else {
-                        telemetry.addData("magazine slot", "empty");
-                        telemetry.update();
-                    }
 
-                    if (counter >= 3) { //On the 4th button press, DO NOT LAUNCH and realign
-                        fullRotation(0.5f, 1f, false, "null");
-                        counter = 0;
-                    } else {
-                        launchMotif(21, counter); ///NEED TO CALL LAUNCHMOTIF THREE TIMES BASED ON WHICH ONE WAS ACTUALLY LAUNCHED
-                        counter += 1;
-                    }
-
-                }
                 //}
 
                 /// move the magazine with custom "PID"
@@ -448,17 +427,7 @@ public class GPPOmniOpMode extends LinearOpMode {
                 telemetry.addData("Counter", counter);
                 telemetry.addData("Output Power: ", outtakePower);
                 telemetry.addData("Press A for GPP/21", "Press B for PGP/22", "Press X for PPG/23");
-                telemetry.addData("Current ID:", aprilTagID);
-
-                if (gamepad1.a) {
-                    aprilTagID = "21";
-                }
-                if (gamepad1.b) {
-                    aprilTagID = "22";
-                }
-                if (gamepad1.x) {
-                    aprilTagID = "23";
-                }
+                //telemetry.addData("Current ID:", aprilTagID);
 
 
                 telemetry.update();
@@ -541,6 +510,70 @@ public class GPPOmniOpMode extends LinearOpMode {
         //magazine.setTargetPosition((int) floatTargetPosition);
     }
 
+        public void launchBall (String ballColor) {
+        float theoreticalSlot;
+        float numRotationsRequired;
+
+        //for (int i = 0; i < 3; i++) {
+        theoreticalSlot = topSlotNumber;
+        numRotationsRequired = 0f;
+        /*if ((colors[(int) theoreticalSlot] == null || colors[(int) theoreticalSlot].isEmpty())) {
+            telemetry.addData("value in array is empty", "ball skipped and counter reset");
+            telemetry.update();
+            fullRotation(0.5f, 1, false,null);
+            counter = 0;
+            sleep(500);
+            return;
+        }*/
+    //if ((colors[(int) theoreticalSlot]) != (null)) {
+            int nullCounter = 0;
+            while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(ballColor))) {
+                numRotationsRequired += 1f;
+                theoreticalSlot += 1f;
+                if (theoreticalSlot >= 3f) {
+                    theoreticalSlot = theoreticalSlot - 3f;
+                }
+                if (numRotationsRequired >= 3f) {
+                    numRotationsRequired -= 3f;
+                }
+                if (numRotationsRequired == 2f) {
+                    numRotationsRequired = -1f;
+                }
+                telemetry.addData(colors[(int) theoreticalSlot], ballColor);
+
+                nullCounter ++;
+                if (nullCounter > 6) {
+                    return;
+                }
+            }
+        //}
+            /*if (numRotationsRequired == 2f) { //this makes it rotate in the other direction instead of rotating twice
+                numRotationsRequired = -1f;
+            }*/
+        telemetry.addData("numRotationsRequired", numRotationsRequired);
+        telemetry.addData("launching", ballColor);
+        telemetry.addData("Bottom Slot", slotNumber);
+        telemetry.addData("Top Slot", topSlotNumber);
+        telemetry.addData("current color", colors[(int) theoreticalSlot]);
+        telemetry.addData("colors 0", colors[0]);
+        telemetry.addData("colors 1", colors[1]);
+        telemetry.addData("colors 2", colors[2]);
+        telemetry.update();
+        //telemetry.update();
+
+        colors[(int) theoreticalSlot] = "";
+        fullRotation(numRotationsRequired, 1F, false, "none");
+        //while (magazine.isBusy() && opModeIsActive()) {
+        //    telemetry.addData("status", "moving");
+        //}
+
+        //sleep(2000);//launch
+        //}
+
+    }
+
+
+
     //magazine.setPower(1.0);
         /*while (Math.abs(floatTargetPosition - magazine.getCurrentPosition()) > 5) { // 5 is tolerance
 
@@ -551,7 +584,7 @@ public class GPPOmniOpMode extends LinearOpMode {
         } */
 
 
-    public void launchMotif ( int aprilTagID, int ballNumber){
+    /*public void launchMotif ( int aprilTagID, int ballNumber){
         float theoreticalSlot;
         float numRotationsRequired;
         String[] motif = new String[3];
@@ -590,7 +623,7 @@ public class GPPOmniOpMode extends LinearOpMode {
             return;
         }*/
         //if ((colors[(int) theoreticalSlot]) != (null)) {
-            while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[ballNumber]))) {
+            /*while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[ballNumber]))) {
                 numRotationsRequired += 1f;
                 theoreticalSlot += 1f;
                 if (theoreticalSlot >= 3f) {
@@ -609,7 +642,7 @@ public class GPPOmniOpMode extends LinearOpMode {
             /*if (numRotationsRequired == 2f) { //this makes it rotate in the other direction instead of rotating twice
                 numRotationsRequired = -1f;
             }*/
-        telemetry.addData("numRotationsRequired", numRotationsRequired);
+        /*telemetry.addData("numRotationsRequired", numRotationsRequired);
         telemetry.addData("launching", ballNumber);
         telemetry.addData("Bottom Slot", slotNumber);
         telemetry.addData("Top Slot", topSlotNumber);
@@ -630,7 +663,7 @@ public class GPPOmniOpMode extends LinearOpMode {
         //sleep(2000);//launch
         //}
 
-    }
+    }*/
 
     //}
 
@@ -647,93 +680,6 @@ public class GPPOmniOpMode extends LinearOpMode {
 //*******************************************
 //Taken from the TwoVisionPortals.java file. Not sure what these mean but these are just methods
 //*******************************************
-
-    //private void initAprilTag() {
-        //AprilTagProcessor.Builder myAprilTagProcessorBuilder;
-
-        // First, create an AprilTagProcessor.Builder.
-        //myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
-        // Create each AprilTagProcessor by calling build.
-        //myAprilTagProcessor_1 = myAprilTagProcessorBuilder.build();
-        //myAprilTagProcessor_2 = myAprilTagProcessorBuilder.build();
-        //Make_first_VisionPortal();
-        //Make_second_VisionPortal();
-    //}
-
-    /**
-     * Describe this function...
-     */
-    /*private void Make_first_VisionPortal() {
-        // Create a VisionPortal.Builder and set attributes related to the first camera.
-        myVisionPortalBuilder = new VisionPortal.Builder();
-        if (USE_WEBCAM_1) {
-            // Use a webcam.
-            myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        } else {
-            // Use the device's back camera.
-            myVisionPortalBuilder.setCamera(BuiltinCameraDirection.BACK);
-        }
-        // Manage USB bandwidth of two camera streams, by adjusting resolution from default 640x480.
-        // Set the camera resolution.
-        myVisionPortalBuilder.setCameraResolution(new Size(320, 240));
-        // Manage USB bandwidth of two camera streams, by selecting Streaming Format.
-        // Set the stream format.
-        myVisionPortalBuilder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
-        // Add myAprilTagProcessor to the VisionPortal.Builder.
-        myVisionPortalBuilder.addProcessor(myAprilTagProcessor_1);
-        // Add the Portal View ID to the VisionPortal.Builder
-        // Set the camera monitor view id.
-        myVisionPortalBuilder.setLiveViewContainerId(Portal_1_View_ID);
-        // Create a VisionPortal by calling build.
-        myVisionPortal_1 = myVisionPortalBuilder.build();
-    }*/
-
-    /**
-     * Describe this function...
-     */
-
-    /**
-     * Display info (using telemetry) for a recognized AprilTag.
-     *
-     * @return
-     */
-    /*private String AprilTag_telemetry_for_Portal_1() {
-        List<AprilTagDetection> myAprilTagDetections_1;
-        AprilTagDetection thisDetection_1;
-
-        // Get a list of AprilTag detections.
-        myAprilTagDetections_1 = myAprilTagProcessor_1.getDetections();
-        telemetry.addData("Portal 1 - # AprilTags Detected", JavaUtil.listLength(myAprilTagDetections_1));
-        // Iterate through list and call a function to display info for each recognized AprilTag.
-        for (AprilTagDetection thisDetection_1_item : myAprilTagDetections_1) {
-            thisDetection_1 = thisDetection_1_item;
-            telemetry.addLine("First Apriltag ID (if 1+ detected, will be SKIPPED" + thisDetection_1.id);
-            if (thisDetection_1.metadata != null) {  // Check first!
-                return String.valueOf(thisDetection_1.id);
-            }
-            // Display info about the detection.
-            //telemetry.addLine("");
-        /* if (thisDetection_1.metadata != null) {
-            telemetry.addLine("==== (ID " + thisDetection_1.id + ") " + thisDetection_1.metadata.name);
-            //telemetry.addLine("XYZ " + JavaUtil.formatNumber(thisDetection_1.ftcPose.x, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_1.ftcPose.y, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_1.ftcPose.z, 6, 1) + "  (inch)");
-            //telemetry.addLine("PRY " + JavaUtil.formatNumber(thisDetection_1.ftcPose.yaw, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_1.ftcPose.pitch, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_1.ftcPose.roll, 6, 1) + "  (deg)");
-            //telemetry.addLine("RBE " + JavaUtil.formatNumber(thisDetection_1.ftcPose.range, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_1.ftcPose.bearing, 6, 1) + " " + JavaUtil.formatNumber(thisDetection_1.ftcPose.elevation, 6, 1) + "  (inch, deg, deg)");
-        } else {
-            //telemetry.addLine("==== (ID " + thisDetection_1.id + ") Unknown");
-            return null; */
-            //telemetry.addLine("Center " + JavaUtil.formatNumber(thisDetection_1.center.x, 6, 0) + "" + JavaUtil.formatNumber(thisDetection_1.center.y, 6, 0) + " (pixels)");
-        //}
-        //return null;
-    //}
-
-//}
-
-    /**
-     * Display info (using telemetry) for a recognized AprilTag.
-     */
-    /**
-     * Describe this function...
-     */
 
     private boolean dpad_up_was_pressed() {
         return currentGamepad2.dpad_up && !previousGamepad2.dpad_up;
