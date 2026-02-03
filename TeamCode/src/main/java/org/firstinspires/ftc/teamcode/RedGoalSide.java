@@ -316,11 +316,11 @@ public class RedGoalSide extends LinearOpMode {
         }
         int magazinePos = (int) floatTargetPosition;
         while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 0) {
-            if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
+            if (magazinePos - magazine.getCurrentPosition() >= 60 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
             } else {
-                if (magazinePos - magazine.getCurrentPosition() <= -11 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() <= -60 && MagazinePositiveMotion == false) {
                     magazine.setPower(-1);
                     PDIcontroller = false;
                 } else {
@@ -329,16 +329,16 @@ public class RedGoalSide extends LinearOpMode {
                 }
             }
             if (PDIcontroller == true) {
-                if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() >= 3 && MagazinePositiveMotion == false) {
                     magazine.setPower(0.5);
                 } else {
-                    if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == true) {
+                    if (magazinePos - magazine.getCurrentPosition() <= -3 && MagazinePositiveMotion == true) {
                         magazine.setPower(-0.5);
                     } else {
-                        if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == true) {
+                        if (magazinePos - magazine.getCurrentPosition() >= 3 && MagazinePositiveMotion == true) {
                             magazine.setPower(0.2);
                         } else {
-                            if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == false) {
+                            if (magazinePos - magazine.getCurrentPosition() <= -3 && MagazinePositiveMotion == false) {
                                 magazine.setPower(-0.2);
                             } else {
                                 magazine.setPower(0);
