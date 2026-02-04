@@ -13,15 +13,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
-
-import java.util.List;
 
 
 @TeleOp(name = "2026 Omni Op Mode")
@@ -66,12 +61,14 @@ public class GPPOmniOpMode extends LinearOpMode {
     static final double DRIVE_SPEED = 0.3;
     //static final double     TURN_SPEED              = 0.5;
 
-    String[] colors = new String[3];
-    float slotNumber = 0f;
-    float topSlotNumber = 1.5f;
+    //String[] colors = new String[3];
+    String[] colors = {"Black", "Black", "Black"};
+    int slotNumber = 0;
+    int topSlotNumber = 3;
     int magazinePos;
     String swatchResult;
     float outtakePower = 0f;
+    boolean recordNewColor = true;
 
     //String aprilTagID = String.valueOf("21");
     int currentMagazinePosition = 0;
@@ -271,16 +268,24 @@ public class GPPOmniOpMode extends LinearOpMode {
                     driveSpeed = 1;
                 }
 
-                intake.setPower(gamepad2.right_stick_y);
+                if (gamepad2.y) {
+                    intake.setPower(1);
+                } else {
+                    if (gamepad2.x) {
+                        intake.setPower(-0.6);
+                    } else {
+                        intake.setPower(0);
+                    }
+                }
+
+                if (gamepad2.guideWasPressed()) {
+                    fullRotation((launchBall("ARTIFACT_PURPLE")), 1, false, null);
+                }
+                if (gamepad2.backWasPressed()) {
+                    fullRotation((launchBall("ARTIFACT_GREEN")), 1, false, null);
+                }
 
                 if (gamepad2.aWasPressed()) {
-                    launchBall("ARTIFACT_GREEN");
-                }
-                if (gamepad2.bWasPressed()) {
-                    launchBall("ARTIFACT_PURPLE");
-                }
-
-                if (gamepad2.x) {
                     if (outtakePower == 0f) {
                         outtakePower = 0.5f;
                     }
@@ -288,11 +293,23 @@ public class GPPOmniOpMode extends LinearOpMode {
                         outtakePower = 0;
                     }
                     else {
-                    outtakePower += 0f;
+                    outtakePower += 0.05f;
                     }
                 }
-                if (gamepad2.y) {
-                    outtakePower = 0f;
+                if (gamepad2.b) {
+                    if (outtakePower != 0f) {
+                        outtakePower = 0f;
+                    }
+                    else {
+                        outtakePower = -0.3f;
+                    }
+                }
+
+                if (outtakePower == 0f) {
+                    recordNewColor = true;
+                }
+                else {
+                    recordNewColor = false;
                 }
 
                 outtake.setPower(outtakePower);
@@ -301,7 +318,7 @@ public class GPPOmniOpMode extends LinearOpMode {
                 //swatchResult = result.closestSwatch.toString();
                 //telemetry.addData("Color Scanned", swatchResult);
 
-                if (left_bumper_was_pressed()) { //control for autosort
+                /*if (left_bumper_was_pressed()) { //control for autosort
                     PredominantColorProcessor.Result result2 = colorSensor.getAnalysis();
                     swatchResult = result2.closestSwatch.toString();
                     if ((((swatchResult.equals("ARTIFACT_PURPLE")) || (swatchResult.equals("ARTIFACT_GREEN"))))) {
@@ -311,14 +328,17 @@ public class GPPOmniOpMode extends LinearOpMode {
                         telemetry.addData("Did not rotate", "No color detected");
                         //telemetry.update();
                     }
-                }
+                }*/
+
+                PredominantColorProcessor.Result result2 = colorSensor.getAnalysis();
+                swatchResult = result2.closestSwatch.toString();
 
                 if (dpad_up_was_pressed()) {
-                    fullRotation(1, 1, false, null);
+                    fullRotation(1, 1, recordNewColor, swatchResult);
                     MagazinePositiveMotion = true;
                 } else {
                     if (dpad_down_was_pressed()) {
-                        fullRotation(-1, 1, false, null);
+                        fullRotation(-1, 1, recordNewColor, swatchResult);
                         MagazinePositiveMotion = false;
                     } else {
                         if (gamepad2.left_stick_button) {
@@ -485,22 +505,15 @@ public class GPPOmniOpMode extends LinearOpMode {
         if (assignNewColor) {
             //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
 
-            if (slotNumber % 1.0 == 0) {
-                colors[(int) slotNumber] = colorResult;
-                if (!colors[(int) slotNumber].equals("ARTIFACT_PURPLE") && !colors[(int) slotNumber].equals("ARTIFACT_GREEN")) {
-                    //colors[(int) slotNumber] = "ARTIFACT_PURPLE";///hold for error analysis
-                }
+            if (slotNumber%2 == 0) {
+                colors[slotNumber/2] = colorResult;
             }
         }
-        slotNumber += (1 * numOfRotations);
-        if (slotNumber >= 3) {
-            slotNumber = slotNumber - 3;
-        }
+        slotNumber += (2 * numOfRotations);
+        slotNumber = fixSlotNumber(slotNumber);
 
-        topSlotNumber += (1 * numOfRotations);
-        if (topSlotNumber >= 3) {
-            topSlotNumber = topSlotNumber - 3;
-        }
+        topSlotNumber += (2 * numOfRotations);
+        topSlotNumber = fixSlotNumber(topSlotNumber);
 
         //Make motor move with custom PID controller -- This was written by Claude because I don't understand PID controllers
 
@@ -510,8 +523,13 @@ public class GPPOmniOpMode extends LinearOpMode {
         //magazine.setTargetPosition((int) floatTargetPosition);
     }
 
-        public void launchBall (String ballColor) {
-        float theoreticalSlot;
+        public float launchBall (String ballColor) {
+
+        if (topSlotNumber%2 != 0) {
+            return 0;
+        }
+
+        int theoreticalSlot;
         float numRotationsRequired;
 
         //for (int i = 0; i < 3; i++) {
@@ -527,23 +545,21 @@ public class GPPOmniOpMode extends LinearOpMode {
         }*/
     //if ((colors[(int) theoreticalSlot]) != (null)) {
             int nullCounter = 0;
-            while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(ballColor))) {
+            while ((opModeIsActive()) && (!colors[(int) theoreticalSlot/2].equals(ballColor))) {
                 numRotationsRequired += 1f;
-                theoreticalSlot += 1f;
-                if (theoreticalSlot >= 3f) {
-                    theoreticalSlot = theoreticalSlot - 3f;
-                }
+                theoreticalSlot += 2;
+                theoreticalSlot = fixSlotNumber(theoreticalSlot);
                 if (numRotationsRequired >= 3f) {
                     numRotationsRequired -= 3f;
                 }
                 if (numRotationsRequired == 2f) {
                     numRotationsRequired = -1f;
                 }
-                telemetry.addData(colors[(int) theoreticalSlot], ballColor);
+                telemetry.addData(colors[theoreticalSlot/2], ballColor);
 
                 nullCounter ++;
                 if (nullCounter > 6) {
-                    return;
+                    return 0;
                 }
             }
         //}
@@ -554,15 +570,15 @@ public class GPPOmniOpMode extends LinearOpMode {
         telemetry.addData("launching", ballColor);
         telemetry.addData("Bottom Slot", slotNumber);
         telemetry.addData("Top Slot", topSlotNumber);
-        telemetry.addData("current color", colors[(int) theoreticalSlot]);
+        telemetry.addData("current color", colors[theoreticalSlot/2]);
         telemetry.addData("colors 0", colors[0]);
         telemetry.addData("colors 1", colors[1]);
         telemetry.addData("colors 2", colors[2]);
         telemetry.update();
         //telemetry.update();
 
-        colors[(int) theoreticalSlot] = "";
-        fullRotation(numRotationsRequired, 1F, false, "none");
+        colors[theoreticalSlot/2] = "Black";
+        return (numRotationsRequired);
         //while (magazine.isBusy() && opModeIsActive()) {
         //    telemetry.addData("status", "moving");
         //}
@@ -570,6 +586,16 @@ public class GPPOmniOpMode extends LinearOpMode {
         //sleep(2000);//launch
         //}
 
+    }
+
+    public int fixSlotNumber (int slot) {
+        if (slot >= 6) {
+            slot = slot - 6;
+        }
+        if (slot < 0) {
+            slot = slot + 6;
+        }
+        return (slot);
     }
 
 
