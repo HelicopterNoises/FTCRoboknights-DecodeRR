@@ -33,7 +33,8 @@ import java.util.List;
 public class RedBackSide extends LinearOpMode {
 
     private DcMotorEx magazine = null;
-    private DcMotor outtake = null;
+    private DcMotorEx outtake = null;
+    private DcMotor intake = null;
 
     private Limelight3A limelight;
 
@@ -80,7 +81,7 @@ public class RedBackSide extends LinearOpMode {
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final float COUNTS_PER_FULL_REV = 96.245f;    // This should be 47.1 at some point but it's fine for now
+    static final float COUNTS_PER_FULL_REV = 1203.57647f;    // This should be 47.1 at some point but it's fine for now
     float floatTargetPosition = 0;
     //static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     //static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -89,10 +90,10 @@ public class RedBackSide extends LinearOpMode {
     static final double DRIVE_SPEED = 0.3;
     //static final double     TURN_SPEED              = 0.5;
 
-    String[] colors = new String[3];
+    String[] colors = new String[]{"Black", "Black", "Black"};
     float slotNumber = 0f;
     float topSlotNumber = 1.5f;
-    String aprilTagID = String.valueOf('0'); //used for old camera processor
+    //String aprilTagID = String.valueOf('0'); //used for old camera processor
     int tagId = 0;
     int currentMagazinePosition = 0;
 
@@ -103,8 +104,8 @@ public class RedBackSide extends LinearOpMode {
     @Override
     public void runOpMode() {
         magazine = (DcMotorEx) hardwareMap.get(DcMotor.class, "magazine");
-        outtake = hardwareMap.get(DcMotor.class, "outtake");
-
+        outtake = hardwareMap.get(DcMotorEx.class, "outtake");
+        intake =  hardwareMap.get(DcMotor.class, "intake");
         limelight = hardwareMap.get(Limelight3A.class, "limelight"); //map limelight to robot configuration
         telemetry.setMsTransmissionInterval(11); //For the limelight
         limelight.pipelineSwitch(0); //for the limelight
@@ -174,8 +175,8 @@ public class RedBackSide extends LinearOpMode {
 
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
-
-        Pose2d beginPose = new Pose2d(60.68, 12.34, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
+        /// PASTE LINE 1 HERE`
+        Pose2d beginPose = new Pose2d(63.72, 8.62, Math.toRadians(180)); //LUKE: FIRST LINE NUMBERS GO HERE
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -247,17 +248,27 @@ public class RedBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
                         .build());*/
-        outtake.setPower(0.61);
+        outtake.setPower(0.6);
         scanApriltag();
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(51.55, 18.59), Math.toRadians(160))
-                .build());
-        sleep(6000);
+                        .splineTo(new Vector2d(57.97, 11.66), Math.toRadians(157.67))
+                        .build());
+
+
+        sleep(4000);
+        intake.setPower(0.6);
+        sleep(1000);
+
+
 
         fullRotation(0.5f, 0.3f, false);
+        //telemetry.addData("Status:", "arrived at post-rotation 1 checkpoint");
+        //telemetry.update();
+
         launchMotif(tagId);
+        intake.setPower(0);
 
         /*Actions.runBlocking(
                 drive.actionBuilder(beginPose)
@@ -286,7 +297,26 @@ public class RedBackSide extends LinearOpMode {
                         trajectoryActionCloseOut
                 )
         ); */
-    }
+            //finally { //don't crash when stop
+            // This ALWAYS runs, even if STOP is pressed
+            try {
+                if (myVisionPortal_2 != null) {
+                    myVisionPortal_2.close();
+                }
+            } catch (Exception e) {
+                // Ignore errors closing portal 1
+            }
+
+            // Stop all motors
+            try {
+                intake.setPower(0);
+                magazine.setPower(0);
+                outtake.setPower(0);
+            } catch (Exception e) {
+                // Ignore errors stopping motors
+            }
+        }
+    //}
 
     public void fullRotation(float numOfRotations, float magazinePower, boolean assignNewColor) {
         if (assignNewColor) {
@@ -302,14 +332,11 @@ public class RedBackSide extends LinearOpMode {
             }
         }
         slotNumber += (1 * numOfRotations);
-        if (slotNumber >= 3) {
-            slotNumber = slotNumber - 3;
-        }
+        slotNumber = fixSlotNumber(slotNumber);
 
         topSlotNumber += (1 * numOfRotations);
-        if (topSlotNumber >= 3) {
-            topSlotNumber = topSlotNumber - 3;
-        }
+        topSlotNumber = fixSlotNumber(topSlotNumber);
+
 
         //Make motor move with custom PID controller -- This was written by Claude because I don't understand PID controllers
 
@@ -325,13 +352,12 @@ public class RedBackSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        boolean readyToGo = false;
-        while ((Math.abs(magazinePos - magazine.getCurrentPosition()) > 0)) {
-            if (magazinePos - magazine.getCurrentPosition() >= 13 && MagazinePositiveMotion == true) {
+        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 0) {
+            if (magazinePos - magazine.getCurrentPosition() >= 60 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
             } else {
-                if (magazinePos - magazine.getCurrentPosition() <= -13 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() <= -60 && MagazinePositiveMotion == false) {
                     magazine.setPower(-1);
                     PDIcontroller = false;
                 } else {
@@ -340,20 +366,19 @@ public class RedBackSide extends LinearOpMode {
                 }
             }
             if (PDIcontroller == true) {
-                if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() >= 3 && MagazinePositiveMotion == false) {
                     magazine.setPower(0.5);
                 } else {
-                    if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == true) {
+                    if (magazinePos - magazine.getCurrentPosition() <= -3 && MagazinePositiveMotion == true) {
                         magazine.setPower(-0.5);
                     } else {
-                        if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == true) {
+                        if (magazinePos - magazine.getCurrentPosition() >= 3 && MagazinePositiveMotion == true) {
                             magazine.setPower(0.2);
                         } else {
-                            if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == false) {
+                            if (magazinePos - magazine.getCurrentPosition() <= -3 && MagazinePositiveMotion == false) {
                                 magazine.setPower(-0.2);
                             } else {
                                 magazine.setPower(0);
-                                //readyToGo = true;
                                 PDIcontroller = false;
                             }
                         }
@@ -399,10 +424,12 @@ public class RedBackSide extends LinearOpMode {
 
 
     public void launchMotif (int aprilTagID) {
+        //telemetry.addData("🚀 ENTERING launchMotif", "Tag ID: " + tagId);
+        //telemetry.update();
         float theoreticalSlot = topSlotNumber;
         float numRotationsRequired = 0f;
         String[] motif = new String[3];
-        switch (aprilTagID) {
+        switch (tagId) {
             case 21:
                 motif[0] = "ARTIFACT_GREEN";
                 motif[1] = "ARTIFACT_PURPLE";
@@ -418,49 +445,59 @@ public class RedBackSide extends LinearOpMode {
                 motif[1] = "ARTIFACT_PURPLE";
                 motif[2] = "ARTIFACT_GREEN";
                 break;
-            default:
-                telemetry.addData("APRILTAG ERROR", "no case");
-                telemetry.update();
+            default: //sets to random motif if scan error
+                motif[0] = "ARTIFACT_PURPLE";
+                motif[1] = "ARTIFACT_PURPLE";
+                motif[2] = "ARTIFACT_GREEN";
                 sleep(500);
                 // code block to execute if no case matches (optional)
         }
+        //telemetry.addData("Status", "Passed Switch Statement");
+        //telemetry.update();
 
         for (int i = 0; i < 3; i++) {
             theoreticalSlot = topSlotNumber;
             numRotationsRequired = 0f;
-            if (colors[(int)theoreticalSlot].equals(null)) {
+            /*if (colors[(int)theoreticalSlot].equals(null)) {
                 telemetry.addData("value in array equals null", "skipped");
                 telemetry.update();
                 sleep(500);
                 continue;
-            }
+            }*/
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[i]))) {
+                //telemetry.addData("Iteration", i);
+                //telemetry.addData("theoreticalSlot", theoreticalSlot);
+                //telemetry.addData("colors at slot", colors[(int)theoreticalSlot]);
+                //telemetry.addData("Looking for", motif[i]);
+                //telemetry.update();
+                //sleep(100); //REMOVE TELEMETRY IF IT WORKS
                 numRotationsRequired += 1f;
+                //telemetry.addData()
                 theoreticalSlot += 1f;
-                if (theoreticalSlot >= 3f) {
-                    theoreticalSlot = theoreticalSlot - 3f;
-                }
+                theoreticalSlot = fixSlotNumber(theoreticalSlot);
                 if (numRotationsRequired >= 3f) {
                     numRotationsRequired -= 3f;
                 }
-                if (numRotationsRequired == 2f) {
-                    numRotationsRequired = -1f;
-                }
                 telemetry.addData(colors[(int) theoreticalSlot], motif[i]);
                 telemetry.update();
+                sleep(20);
             }
             /*if (numRotationsRequired == 2f) { //this makes it rotate in the other direction instead of rotating twice
                 numRotationsRequired = -1f;
             }*/
-            telemetry.addData("numRotationsRequired", numRotationsRequired);
-            telemetry.update();
-            fullRotation(numRotationsRequired, 0.4F, false);
+            if (numRotationsRequired == 2f) {
+                numRotationsRequired = -1f;
+            }
+
+            fullRotation(numRotationsRequired, 1F, false);
             sleep(2000);
             //while (magazine.isBusy() && opModeIsActive()) {
             //hold loop while function moving
             //}
-            colors[(int)theoreticalSlot] = "";
+            colors[(int)theoreticalSlot] = "Black";
             telemetry.addData("launching", i);
+            telemetry.addData("topSlotNumber now", topSlotNumber);
+            telemetry.addData("numRotationsRequired", numRotationsRequired);
             telemetry.addData("Bottom Slot", slotNumber);
             telemetry.addData("Top Slot", topSlotNumber);
             telemetry.addData("current color", colors[(int)theoreticalSlot]);
@@ -473,7 +510,6 @@ public class RedBackSide extends LinearOpMode {
         }
 
     }
-    //}
 
 
     // Stop all motion;
@@ -671,15 +707,36 @@ public class RedBackSide extends LinearOpMode {
 
                 if (fiducials != null && !fiducials.isEmpty()) {
                     // Use the first detected tag
-                    tagId = fiducials.get(0).getFiducialId();
+                    for (LLResultTypes.FiducialResult fiducial : fiducials) {
+                        int detectedId = fiducial.getFiducialId();
 
-                    telemetry.addData("✓ Detected Tag ID", tagId);
-                    telemetry.addData("Number of tags", fiducials.size());
-                    telemetry.update();
-                    break; // Found a tag, exit loop
+                        // ONLY accept tags 21, 22, or 23 (ignore all others)
+                        if (detectedId == 21 || detectedId == 22 || detectedId == 23) {
+                            tagId = detectedId;
+                            telemetry.addData("✓ Detected Tag ID", tagId);
+                            telemetry.addData("Number of tags", fiducials.size());
+                            telemetry.update();
+                            break; // Found a valid tag, exit loop
+                        } else {
+                            telemetry.addData("⚠ Ignoring Tag ID", detectedId);
+                            telemetry.update();
+                        }
+                        //tagId = fiducials.get(0).getFiducialId();
+
+                    }
                 }
             }
         }
+    }
+
+    private float fixSlotNumber (float slot) {
+        if (slot >= 3f) {
+            slot = slot - 3f;
+        }
+        if (slot < 0f) {
+            slot = slot + 3f;
+        }
+        return (slot);
     }
 
 }

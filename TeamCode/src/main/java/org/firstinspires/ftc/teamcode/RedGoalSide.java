@@ -78,7 +78,7 @@ public class RedGoalSide extends LinearOpMode {
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final float COUNTS_PER_FULL_REV = 96.245f;    // This should be 47.1 at some point but it's fine for now
+    static final float COUNTS_PER_FULL_REV = 1203.57647f;    // This should be 47.1 at some point but it's fine for now
     float floatTargetPosition = 0;
     //static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     //static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -447,7 +447,7 @@ public class RedGoalSide extends LinearOpMode {
             //while (magazine.isBusy() && opModeIsActive()) {
             //hold loop while function moving
             //}
-            colors[(int) theoreticalSlot] = "";
+            colors[(int) theoreticalSlot] = "Black";
             telemetry.addData("launching", i);
             telemetry.addData("Bottom Slot", slotNumber);
             telemetry.addData("Top Slot", topSlotNumber);

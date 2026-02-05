@@ -28,7 +28,7 @@ public class GPPOmniOpMode extends LinearOpMode {
     private DcMotor backRight;
     private DcMotor intake;
     private DcMotor magazine;
-    private DcMotor outtake;
+    private DcMotorEx outtake;
 
     double leftFrontPower;
     double leftBackPower;
@@ -67,7 +67,7 @@ public class GPPOmniOpMode extends LinearOpMode {
     int topSlotNumber = 3;
     int magazinePos;
     String swatchResult;
-    float outtakePower = 0f;
+    int outtakeVelocity = 0;
     boolean recordNewColor = true;
 
     //String aprilTagID = String.valueOf("21");
@@ -98,7 +98,7 @@ public class GPPOmniOpMode extends LinearOpMode {
         backRight = hardwareMap.get(DcMotor.class, "backRight");
         intake = hardwareMap.get(DcMotor.class, "intake");
         magazine = hardwareMap.get(DcMotor.class, "magazine");
-        outtake = hardwareMap.get(DcMotor.class, "outtake");
+        outtake = hardwareMap.get(DcMotorEx.class, "outtake");
 
         runtime = new ElapsedTime();
         // ########################################################################################
@@ -286,33 +286,30 @@ public class GPPOmniOpMode extends LinearOpMode {
                 }
 
                 if (gamepad2.aWasPressed()) {
-                    if (outtakePower == 0f) {
-                        outtakePower = 0.5f;
+                    if (outtakeVelocity != 1200) {
+                        outtakeVelocity = 1200;
                     }
-                    else if (outtakePower == 0.8f) {
-                        outtakePower = 0;
-                    }
-                    else {
-                    outtakePower += 0.05f;
+                    else if (outtakeVelocity == 1200) {
+                        outtakeVelocity = 1500;
                     }
                 }
-                if (gamepad2.b) {
-                    if (outtakePower != 0f) {
-                        outtakePower = 0f;
+                if (gamepad2.bWasPressed()) {
+                    if (outtakeVelocity != 0) {
+                        outtakeVelocity = 0;
                     }
                     else {
-                        outtakePower = -0.3f;
+                        outtakeVelocity = -600;
                     }
                 }
 
-                if (outtakePower == 0f) {
+                if (outtakeVelocity == 0) {
                     recordNewColor = true;
                 }
                 else {
                     recordNewColor = false;
                 }
 
-                outtake.setPower(outtakePower);
+                outtake.setVelocity(outtakeVelocity);
 
                 //PredominantColorProcessor.Result result = colorSensor.getAnalysis();
                 //swatchResult = result.closestSwatch.toString();
@@ -357,22 +354,10 @@ public class GPPOmniOpMode extends LinearOpMode {
                                 if (dpad_right_was_pressed()) {
                                     MagazinePositiveMotion = true;
                                     fullRotation(0.5f, 1, false, "null");
-                                /*if (BottomAligned == false) {
-                                    BottomAligned = true;
-                                } else if (BottomAligned == true) {
-                                    BottomAligned = false;
-                                } */
                                 } else {
                                     if (dpad_left_was_pressed()) {
                                         MagazinePositiveMotion = false;
                                         fullRotation(-0.5f, 1, false, "null");
-                                    /*if (BottomAligned == false) {
-                                        BottomAligned = true;
-                                    } else if (BottomAligned == true) {
-                                        BottomAligned = false;
-                                    }*/
-                                    } else {
-                                        //PDIcontroller = false;
                                     }
                                 }
                             }
@@ -437,22 +422,18 @@ public class GPPOmniOpMode extends LinearOpMode {
                 telemetry.addData("Status", "Run Time: " + runtime);
                 telemetry.addData("Status", "MagazinePos: " + magazinePos);
                 telemetry.addData("Status", "CurrentPos: " + magazine.getCurrentPosition());
-                telemetry.addData("Status", "Bottom Aligned: " + BottomAligned);
-                //telemetry.addData("Status", "Magazine Positive Motion" + MagazinePositiveMotion);
                 telemetry.addData("Front left/Right", JavaUtil.formatNumber(leftFrontPower, 4, 2) + ", " + JavaUtil.formatNumber(rightFrontPower, 4, 2));
                 telemetry.addData("Back  left/Right", JavaUtil.formatNumber(leftBackPower, 4, 2) + ", " + JavaUtil.formatNumber(rightBackPower, 4, 2));
                 telemetry.addData("colors 0", colors[0]);
                 telemetry.addData("colors 1", colors[1]);
                 telemetry.addData("colors 2", colors[2]);
                 telemetry.addData("Counter", counter);
-                telemetry.addData("Output Power: ", outtakePower);
-                telemetry.addData("Press A for GPP/21", "Press B for PGP/22", "Press X for PPG/23");
+                telemetry.addData("Outtake Velocity: ", outtake.getVelocity());
+                telemetry.addData("Press Logitech for Purple ball", "Press Back for Green ball");
                 //telemetry.addData("Current ID:", aprilTagID);
 
 
                 telemetry.update();
-                magazine.setTargetPosition(magazinePos);
-
             }
         }
         finally { //don't crash when stop

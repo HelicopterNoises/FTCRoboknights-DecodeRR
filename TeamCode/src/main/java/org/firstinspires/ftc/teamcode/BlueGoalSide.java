@@ -80,7 +80,7 @@ public class BlueGoalSide extends LinearOpMode {
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final float COUNTS_PER_FULL_REV = 96.245f;    // This should be 47.1 at some point but it's fine for now
+    static final float COUNTS_PER_FULL_REV = 1203.57647f;    // This should be 47.1 at some point but it's fine for now
     float floatTargetPosition = 0;
     //static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     //static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -319,15 +319,12 @@ public class BlueGoalSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        //magazine.setTargetPosition(magazinePos);
-        //magazine.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //magazine.setPower(0.8);
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 1) {
-            if (magazinePos - magazine.getCurrentPosition() >= 11 && MagazinePositiveMotion == true) {
+        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 0) {
+            if (magazinePos - magazine.getCurrentPosition() >= 60 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
             } else {
-                if (magazinePos - magazine.getCurrentPosition() <= -11 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() <= -60 && MagazinePositiveMotion == false) {
                     magazine.setPower(-1);
                     PDIcontroller = false;
                 } else {
@@ -336,16 +333,16 @@ public class BlueGoalSide extends LinearOpMode {
                 }
             }
             if (PDIcontroller == true) {
-                if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == false) {
+                if (magazinePos - magazine.getCurrentPosition() >= 3 && MagazinePositiveMotion == false) {
                     magazine.setPower(0.5);
                 } else {
-                    if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == true) {
+                    if (magazinePos - magazine.getCurrentPosition() <= -3 && MagazinePositiveMotion == true) {
                         magazine.setPower(-0.5);
                     } else {
-                        if (magazinePos - magazine.getCurrentPosition() >= 1 && MagazinePositiveMotion == true) {
+                        if (magazinePos - magazine.getCurrentPosition() >= 3 && MagazinePositiveMotion == true) {
                             magazine.setPower(0.2);
                         } else {
-                            if (magazinePos - magazine.getCurrentPosition() <= -1 && MagazinePositiveMotion == false) {
+                            if (magazinePos - magazine.getCurrentPosition() <= -3 && MagazinePositiveMotion == false) {
                                 magazine.setPower(-0.2);
                             } else {
                                 magazine.setPower(0);
