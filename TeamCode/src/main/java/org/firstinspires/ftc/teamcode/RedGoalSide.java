@@ -34,6 +34,8 @@ public class RedGoalSide extends LinearOpMode {
 
     private DcMotorEx magazine = null;
     private DcMotorEx outtake = null;
+    private DcMotor intake = null;
+
 
     private Limelight3A limelight;
 
@@ -101,6 +103,8 @@ public class RedGoalSide extends LinearOpMode {
         outtake = hardwareMap.get(DcMotorEx.class, "outtake");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight"); //map limelight to robot configuration
+        intake =  hardwareMap.get(DcMotor.class, "intake");
+
         telemetry.setMsTransmissionInterval(11); //For the limelight
         limelight.pipelineSwitch(0); //for the limelight
         limelight.start();
@@ -170,7 +174,7 @@ public class RedGoalSide extends LinearOpMode {
         telemetry.setMsTransmissionInterval(100);  // Speed up telemetry updates, for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
-        Pose2d beginPose = (new Pose2d(-47.32, 47.32, Math.toRadians(-45)));
+        Pose2d beginPose = (new Pose2d(-68.62, 36.85, Math.toRadians(0)));
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
         //Claw claw = new Claw(hardwareMap);
         //Lift lift = new Lift(hardwareMap);
@@ -240,20 +244,30 @@ public class RedGoalSide extends LinearOpMode {
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(-0.68, 23.32), Math.toRadians(198.64))
+                        .splineTo(new Vector2d(-6.08, 14.03), Math.toRadians(193.29))
                         .build());
         scanApriltag();
         outtake.setVelocity(1220);
-        sleep(6000);
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(-13.69, 11.32), Math.toRadians(125))
+                        .splineTo(new Vector2d(-26.37, 15.55), Math.toRadians(115))
                         .build());
 
+        sleep(4000);
+        intake.setPower(0.6);
+        sleep(1000);
 
-        fullRotation(0.5f, 0.3f, false);
+        //fullRotation(0.5f, 0.3f, false);
         launchMotif(tagId);
+
+        intake.setPower(0);
+
+        Actions.runBlocking(
+                drive.actionBuilder(beginPose)
+                        .splineTo(new Vector2d(-3.89, 30.59), Math.toRadians(4.11))
+                        .build());
+
 
 
 
@@ -422,6 +436,10 @@ public class RedGoalSide extends LinearOpMode {
                 sleep(500);
                 continue;
             }
+            if (theoreticalSlot % 1.0 != 0f) {
+                theoreticalSlot += 0.5f;
+                numRotationsRequired += 0.5f;
+            }
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[i]))) {
                 numRotationsRequired += 1f;
                 theoreticalSlot += 1f;
@@ -431,8 +449,8 @@ public class RedGoalSide extends LinearOpMode {
                 if (numRotationsRequired >= 3f) {
                     numRotationsRequired -= 3f;
                 }
-                if (numRotationsRequired == 2f) {
-                    numRotationsRequired = -1f;
+                if (numRotationsRequired >= 2f) {
+                    numRotationsRequired -= 3f;
                 }
                 telemetry.addData(colors[(int) theoreticalSlot], motif[i]);
                 telemetry.update();

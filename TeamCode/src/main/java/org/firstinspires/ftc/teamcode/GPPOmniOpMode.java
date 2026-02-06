@@ -506,10 +506,6 @@ public class GPPOmniOpMode extends LinearOpMode {
 
         public float launchBall (String ballColor) {
 
-        if (topSlotNumber%2 != 0) {
-            return 0;
-        }
-
         int theoreticalSlot;
         float numRotationsRequired;
 
@@ -526,15 +522,19 @@ public class GPPOmniOpMode extends LinearOpMode {
         }*/
     //if ((colors[(int) theoreticalSlot]) != (null)) {
             int nullCounter = 0;
-            while ((opModeIsActive()) && (!colors[(int) theoreticalSlot/2].equals(ballColor))) {
+            if (theoreticalSlot % 2.0 != 0f) {
+                theoreticalSlot += 1;
+                numRotationsRequired += 0.5f;
+            }
+            while ((opModeIsActive()) && (!colors[theoreticalSlot/2].equals(ballColor))) {
                 numRotationsRequired += 1f;
                 theoreticalSlot += 2;
                 theoreticalSlot = fixSlotNumber(theoreticalSlot);
                 if (numRotationsRequired >= 3f) {
                     numRotationsRequired -= 3f;
                 }
-                if (numRotationsRequired == 2f) {
-                    numRotationsRequired = -1f;
+                if (numRotationsRequired >= 2f) {
+                    numRotationsRequired -= 3f;
                 }
                 telemetry.addData(colors[theoreticalSlot/2], ballColor);
 

@@ -274,7 +274,7 @@ public class RedBackSide extends LinearOpMode {
 
 
 
-        fullRotation(0.5f, 0.3f, false);
+        //fullRotation(0.5f, 0.3f, false);
         //telemetry.addData("Status:", "arrived at post-rotation 1 checkpoint");
         //telemetry.update();
         telemetry.addData("Status", "Just before launchMotif");
@@ -444,7 +444,7 @@ public class RedBackSide extends LinearOpMode {
 
     public void launchMotif (int aprilTagID) {
         telemetry.addData("🚀 ENTERING launchMotif", "Tag ID: " + tagId);
-        telemetry.update();
+        //telemetry.update();
         float theoreticalSlot = topSlotNumber;
         float numRotationsRequired = 0f;
         String[] motif = new String[]{"Black", "Black", "Black"};
@@ -472,7 +472,7 @@ public class RedBackSide extends LinearOpMode {
                 // code block to execute if no case matches (optional)
         }
         telemetry.addData("Status", "Passed Switch Statement");
-        telemetry.update();
+        //telemetry.update();
 
         for (int i = 0; i < 3; i++) {
             theoreticalSlot = topSlotNumber;
@@ -484,23 +484,23 @@ public class RedBackSide extends LinearOpMode {
                 continue;
             }*/
             telemetry.addData("Status", "Entered For Loop");
-            telemetry.update();
+            //telemetry.update();
+            if (theoreticalSlot % 1.0 != 0f) {
+                theoreticalSlot += 0.5f;
+                numRotationsRequired += 0.5f;
+            }
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[i]))) {
-                //telemetry.addData("Iteration", i);
-                //telemetry.addData("theoreticalSlot", theoreticalSlot);
-                //telemetry.addData("colors at slot", colors[(int)theoreticalSlot]);
-                //telemetry.addData("Looking for", motif[i]);
-                //telemetry.update();
-                //sleep(100); //REMOVE TELEMETRY IF IT WORKS
                 numRotationsRequired += 1f;
-                //telemetry.addData()
                 theoreticalSlot += 1f;
-                theoreticalSlot = fixSlotNumber(theoreticalSlot);
-
+                if (theoreticalSlot >= 3f) {
+                    theoreticalSlot = theoreticalSlot - 3f;
+                }
                 if (numRotationsRequired >= 3f) {
                     numRotationsRequired -= 3f;
                 }
-
+                if (numRotationsRequired >= 2f) {
+                    numRotationsRequired -= 3f;
+                }
                 telemetry.addData(colors[(int) theoreticalSlot], motif[i]);
                 telemetry.addData("Status", "Inside While Loop");
                 telemetry.addData("i", i);
