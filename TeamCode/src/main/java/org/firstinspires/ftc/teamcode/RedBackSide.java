@@ -38,6 +38,11 @@ public class RedBackSide extends LinearOpMode {
 
     private Limelight3A limelight;
 
+    private DcMotor frontLeft;
+    private DcMotor backLeft;
+    private DcMotor frontRight;
+    private DcMotor backRight;
+
 
 
 
@@ -106,6 +111,12 @@ public class RedBackSide extends LinearOpMode {
         magazine = (DcMotorEx) hardwareMap.get(DcMotor.class, "magazine");
         outtake = hardwareMap.get(DcMotorEx.class, "outtake");
         intake =  hardwareMap.get(DcMotor.class, "intake");
+
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
         limelight = hardwareMap.get(Limelight3A.class, "limelight"); //map limelight to robot configuration
         telemetry.setMsTransmissionInterval(11); //For the limelight
         limelight.pipelineSwitch(0); //for the limelight
@@ -116,7 +127,7 @@ public class RedBackSide extends LinearOpMode {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        magazine.setDirection(DcMotor.Direction.FORWARD);
+        magazine.setDirection(DcMotor.Direction.REVERSE);
 
         magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -248,16 +259,16 @@ public class RedBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(23.32, 23.83), Math.toRadians(113.88))
                         .build());*/
-        outtake.setPower(0.6);
+        outtake.setVelocity(1520);
         scanApriltag();
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .splineTo(new Vector2d(57.97, 11.66), Math.toRadians(157.67))
+                        .splineTo(new Vector2d(57.97, 11.66), Math.toRadians(149.67))
                         .build());
 
 
-        sleep(4000);
+        sleep(10000);
         intake.setPower(0.6);
         sleep(1000);
 
@@ -274,8 +285,16 @@ public class RedBackSide extends LinearOpMode {
                 drive.actionBuilder(beginPose)
                         .splineTo(new Vector2d(51.55, -18.65), Math.toRadians(90))
                         .build());*/
+        frontLeft.setPower(0.3);
+        frontRight.setPower(0.3);
+        backLeft.setPower(0.3);
+        backRight.setPower(0.3);
+        sleep(1000);
 
-
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
 
 
         /*
@@ -497,7 +516,6 @@ public class RedBackSide extends LinearOpMode {
             }
 
             fullRotation(numRotationsRequired, 1F, false);
-            sleep(2000);
             //while (magazine.isBusy() && opModeIsActive()) {
             //hold loop while function moving
             //}
@@ -513,7 +531,7 @@ public class RedBackSide extends LinearOpMode {
             telemetry.addData("colors 1", colors[1]);
             telemetry.addData("colors 2", colors[2]);
             telemetry.update();
-            sleep(1500);//launch
+            sleep(3000);//launch
         }
 
     }

@@ -33,7 +33,7 @@ import java.util.List;
 public class RedGoalSide extends LinearOpMode {
 
     private DcMotorEx magazine = null;
-    private DcMotor outtake = null;
+    private DcMotorEx outtake = null;
 
     private Limelight3A limelight;
 
@@ -98,7 +98,7 @@ public class RedGoalSide extends LinearOpMode {
     @Override
     public void runOpMode() {
         magazine = (DcMotorEx) hardwareMap.get(DcMotor.class, "magazine");
-        outtake = hardwareMap.get(DcMotor.class, "outtake");
+        outtake = hardwareMap.get(DcMotorEx.class, "outtake");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight"); //map limelight to robot configuration
         telemetry.setMsTransmissionInterval(11); //For the limelight
@@ -110,7 +110,7 @@ public class RedGoalSide extends LinearOpMode {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        magazine.setDirection(DcMotor.Direction.FORWARD);
+        magazine.setDirection(DcMotor.Direction.REVERSE);
 
         magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -243,7 +243,7 @@ public class RedGoalSide extends LinearOpMode {
                         .splineTo(new Vector2d(-0.68, 23.32), Math.toRadians(198.64))
                         .build());
         scanApriltag();
-        outtake.setVelocity(1520);
+        outtake.setVelocity(1220);
         sleep(6000);
 
         Actions.runBlocking(

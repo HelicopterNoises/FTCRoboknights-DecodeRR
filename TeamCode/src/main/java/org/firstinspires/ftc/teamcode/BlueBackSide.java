@@ -127,7 +127,7 @@ public class BlueBackSide extends LinearOpMode {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        magazine.setDirection(DcMotor.Direction.FORWARD);
+        magazine.setDirection(DcMotor.Direction.REVERSE);
 
         magazine.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         magazine.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
