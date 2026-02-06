@@ -266,7 +266,7 @@ public class RedBackSide extends LinearOpMode {
         fullRotation(0.5f, 0.3f, false);
         //telemetry.addData("Status:", "arrived at post-rotation 1 checkpoint");
         //telemetry.update();
-
+        telemetry.addData("Status", "Just before launchMotif");
         launchMotif(tagId);
         intake.setPower(0);
 
@@ -352,7 +352,7 @@ public class RedBackSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 0) {
+        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 4) {
             if (magazinePos - magazine.getCurrentPosition() >= 60 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
@@ -424,11 +424,11 @@ public class RedBackSide extends LinearOpMode {
 
 
     public void launchMotif (int aprilTagID) {
-        //telemetry.addData("🚀 ENTERING launchMotif", "Tag ID: " + tagId);
-        //telemetry.update();
+        telemetry.addData("🚀 ENTERING launchMotif", "Tag ID: " + tagId);
+        telemetry.update();
         float theoreticalSlot = topSlotNumber;
         float numRotationsRequired = 0f;
-        String[] motif = new String[3];
+        String[] motif = new String[]{"Black", "Black", "Black"};
         switch (tagId) {
             case 21:
                 motif[0] = "ARTIFACT_GREEN";
@@ -452,8 +452,8 @@ public class RedBackSide extends LinearOpMode {
                 sleep(500);
                 // code block to execute if no case matches (optional)
         }
-        //telemetry.addData("Status", "Passed Switch Statement");
-        //telemetry.update();
+        telemetry.addData("Status", "Passed Switch Statement");
+        telemetry.update();
 
         for (int i = 0; i < 3; i++) {
             theoreticalSlot = topSlotNumber;
@@ -464,6 +464,8 @@ public class RedBackSide extends LinearOpMode {
                 sleep(500);
                 continue;
             }*/
+            telemetry.addData("Status", "Entered For Loop");
+            telemetry.update();
             while ((opModeIsActive()) && (!colors[(int) theoreticalSlot].equals(motif[i]))) {
                 //telemetry.addData("Iteration", i);
                 //telemetry.addData("theoreticalSlot", theoreticalSlot);
@@ -475,10 +477,15 @@ public class RedBackSide extends LinearOpMode {
                 //telemetry.addData()
                 theoreticalSlot += 1f;
                 theoreticalSlot = fixSlotNumber(theoreticalSlot);
+
                 if (numRotationsRequired >= 3f) {
                     numRotationsRequired -= 3f;
                 }
+
                 telemetry.addData(colors[(int) theoreticalSlot], motif[i]);
+                telemetry.addData("Status", "Inside While Loop");
+                telemetry.addData("i", i);
+                telemetry.addData("theoretical slot", theoreticalSlot);
                 telemetry.update();
                 sleep(20);
             }

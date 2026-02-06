@@ -243,7 +243,7 @@ public class RedGoalSide extends LinearOpMode {
                         .splineTo(new Vector2d(-0.68, 23.32), Math.toRadians(198.64))
                         .build());
         scanApriltag();
-        outtake.setPower(0.5);
+        outtake.setVelocity(1520);
         sleep(6000);
 
         Actions.runBlocking(
@@ -315,7 +315,7 @@ public class RedGoalSide extends LinearOpMode {
             MagazinePositiveMotion = false;
         }
         int magazinePos = (int) floatTargetPosition;
-        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 0) {
+        while (Math.abs(magazinePos - magazine.getCurrentPosition()) > 4) {
             if (magazinePos - magazine.getCurrentPosition() >= 60 && MagazinePositiveMotion == true) {
                 magazine.setPower(1);
                 PDIcontroller = false;
